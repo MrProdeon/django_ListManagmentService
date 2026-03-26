@@ -8,13 +8,13 @@
 <body>
     <div class="container mt-5">
         <h1 class="mb-4">Список объектов User</h1>
-        <a href="" class="btn btn-primary mb-3">Создать новый объект</a>
+        <a href="{% url 'users:create_user' %}" class="btn btn-primary mb-3">Создать новый объект</a>
         <ul class="list-group">
             {% for user in users %}
                 <li class="list-group-item">
-                    <a href="">{{user.name}}</a>
-                    <a href="" class="btn btn-sm btn-secondary ml-3">Редактировать</a>
-                    <a href="" class="btn btn-sm btn-danger ml-1">Удалить</a>
+                    <a href="">{{user.email}}</a>
+                    <a href="{% url 'users:update_user' user.pk%}" class="btn btn-sm btn-secondary ml-3">Редактировать</a>
+                    <a href="{% url 'users:delete_user' user.pk%}" class="btn btn-sm btn-danger ml-1">Удалить</a>
                 </li>
             {% endfor %}
         </ul>
