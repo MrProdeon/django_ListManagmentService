@@ -10,7 +10,7 @@ class CreateUser(CreateView):
     model = CustomUser
     form_class = UserForm
     template_name = "create_or_update_user.html"
-    success_url = reverse_lazy("users:list_users")
+    success_url = reverse_lazy("users:list_user")
 
 class ListUser(ListView):
     model = CustomUser
