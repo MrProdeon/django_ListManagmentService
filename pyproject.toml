@@ -10,6 +10,7 @@ python = "^3.12"
 django = "^6.0.3"
 python-dotenv = "^1.2.2"
 psycopg2 = "^2.9.11"
+pillow = "^12.1.1"
 
 
 [tool.poetry.group.linters.dependencies]
