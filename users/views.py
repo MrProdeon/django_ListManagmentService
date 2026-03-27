@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from django.urls import reverse_lazy
-from django.views.generic import CreateView, ListView, DeleteView
+from django.views.generic import CreateView, ListView, DeleteView, DetailView
 from users.models import CustomUser
 from users.forms import UserForm
 
@@ -21,4 +21,9 @@ class DeleteUser(DeleteView):
     model = CustomUser
     template_name = "confirm_delete.html"
     success_url = reverse_lazy("users:list_user")
+    context_object_name = "user"
+
+class DetailUser(DetailView):
+    model = CustomUser
+    template_name = "detail_user.html"
     context_object_name = "user"
