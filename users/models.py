@@ -34,6 +34,9 @@ class CustomUser(AbstractUser):
     comment = models.TextField(blank=True, verbose_name="Комментарий")
     avatar = models.ImageField(blank=True, null=True, verbose_name="Аватар")
     country = models.CharField(max_length=50, verbose_name="Страна")
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата создания")
+    updated_at = models.DateTimeField(auto_now=True, verbose_name="Дата обновления")
+
 
     email = models.EmailField(unique=True, verbose_name="Электронная почта")
     USERNAME_FIELD = "email"
