@@ -12,7 +12,7 @@
         <ul class="list-group">
             {% for user in users %}
                 <li class="list-group-item">
-                    <a href="">{{user.email}}</a>
+                    <a href="{% url 'users:detail_user' user.pk%}">{{user.email}}</a>
                     <a href="{% url 'users:update_user' user.pk%}" class="btn btn-sm btn-secondary ml-3">Редактировать</a>
                     <a href="{% url 'users:delete_user' user.pk%}" class="btn btn-sm btn-danger ml-1">Удалить</a>
                 </li>
