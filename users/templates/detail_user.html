@@ -1,0 +1,20 @@
+<!-- mymodel_detail.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Детали объекта User</title>
+    <link rel="stylesheet" href="/static/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="mb-4">{{ user.email }}</h1>
+        <p>{{ user.phone_number }}</p>
+        <p>Создано: {{ user.created_at }}</p>
+        <p>Обновлено: {{ user.updated_at }}</p>
+        <a href="{% url 'users:update_user' user.pk%}" class="btn btn-sm btn-secondary ml-3">Редактировать</a>
+        <a href="{% url 'users:delete_user' user.pk%}" class="btn btn-sm btn-danger ml-1">Удалить</a>
+        <a href="{% url 'users:list_user' %}" class="btn btn-primary">Вернуться к списку</a>
+    </div>
+    <script src="/static/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
