@@ -1,0 +1,201 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<main>
+    <section class="py-5">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-md-6 col-lg-5">
+                    <div class="card shadow-lg border-0 rounded-3">
+                        <div class="card-header bg-danger text-white text-center py-4">
+                            <h2 class="h4 mb-0">
+                                <i class="bi bi-exclamation-triangle-fill me-2"></i>Подтверждение удаления
+                            </h2>
+                        </div>
+                        <div class="card-body p-5 text-center">
+                            <div class="mb-4">
+                                <div class="bg-light rounded-circle d-flex align-items-center justify-content-center mx-auto mb-4" 
+                                     style="width: 80px; height: 80px;">
+                                    <i class="bi bi-person-x display-4 text-danger"></i>
+                                </div>
+                                <h5 class="mb-3">Вы уверены, что хотите удалить пользователя?</h5>
+                                <div class="alert alert-warning">
+                                    <strong>{{ user.full_name|default:user.email }}</strong>
+                                    {% if user.email and user.full_name %}
+                                        <br><small class="text-muted">{{ user.email }}</small>
+                                    {% elif user.email %}
+                                        <br><small class="text-muted">{{ user.email }}</small>
+                                    {% endif %}
+                                </div>
+                                <p class="text-muted small">
+                                    <i class="bi bi-info-circle me-1"></i>
+                                    Это действие невозможно отменить. Все данные пользователя будут безвозвратно удалены.
+                                </p>
+                            </div>
+                            
+                            <form method="post">
+                                {% csrf_token %}
+                                <div class="d-flex justify-content-center gap-3">
+                                    <a href="{% url 'users:detail_user' user.pk %}" class="btn btn-secondary btn-lg px-4">
+                                        <i class="bi bi-arrow-left me-2"></i>Отмена
+                                    </a>
+                                    <button type="submit" class="btn btn-danger btn-lg px-4">
+                                        <i class="bi bi-trash me-2"></i>Удалить
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                    
+                    <div class="text-center mt-4">
+                        <a href="{% url 'users:list_user' %}" class="text-decoration-none">
+                            <i class="bi bi-arrow-return-left me-1"></i>Вернуться к списку пользователей
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+
+<style>
+    /* Стили для карточки */
+    .card {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        overflow: hidden;
+    }
+    
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1) !important;
+    }
+    
+    /* Анимация для иконки */
+    .bg-light {
+        transition: transform 0.3s ease;
+    }
+    
+    .bg-light:hover {
+        transform: scale(1.1);
+    }
+    
+    /* Стили для кнопок */
+    .btn {
+        transition: all 0.2s ease;
+        border-radius: 8px;
+    }
+    
+    .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+    
+    .btn:active {
+        transform: translateY(0);
+    }
+    
+    .btn-danger:hover {
+        background-color: #bb2d3b;
+        border-color: #b02a37;
+    }
+    
+    /* Стили для предупреждения */
+    .alert {
+        border-radius: 12px;
+        border: none;
+        background-color: #fff3cd;
+        padding: 15px;
+    }
+    
+    .alert strong {
+        font-size: 1.1rem;
+        color: #856404;
+    }
+    
+    /* Анимация появления */
+    .card {
+        animation: fadeInUp 0.5s ease;
+    }
+    
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    /* Пульсация для кнопки удаления */
+    @keyframes pulse {
+        0% {
+            transform: scale(1);
+        }
+        50% {
+            transform: scale(1.05);
+        }
+        100% {
+            transform: scale(1);
+        }
+    }
+    
+    .btn-danger {
+        animation: pulse 2s infinite;
+    }
+    
+    .btn-danger:hover {
+        animation: none;
+    }
+    
+    /* Адаптивность */
+    @media (max-width: 768px) {
+        .card-body {
+            padding: 1.5rem !important;
+        }
+        
+        .btn {
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+        }
+        
+        .bg-light {
+            width: 60px !important;
+            height: 60px !important;
+        }
+        
+        .bg-light i {
+            font-size: 2rem !important;
+        }
+    }
+    
+    /* Стили для ссылки возврата */
+    .text-decoration-none {
+        transition: color 0.2s ease;
+    }
+    
+    .text-decoration-none:hover {
+        text-decoration: underline !important;
+        color: #0d6efd !important;
+    }
+</style>
+
+<script>
+    // Предупреждение перед удалением (дополнительная защита)
+    document.addEventListener('DOMContentLoaded', function() {
+        const deleteForm = document.querySelector('form');
+        const deleteButton = document.querySelector('button[type="submit"]');
+        
+        if (deleteForm && deleteButton) {
+            deleteForm.addEventListener('submit', function(event) {
+                // Двойное подтверждение
+                const confirmDelete = confirm('Вы действительно хотите удалить пользователя {{ user.full_name|default:user.email }}?\n\nЭто действие невозможно отменить!');
+                if (!confirmDelete) {
+                    event.preventDefault();
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}
