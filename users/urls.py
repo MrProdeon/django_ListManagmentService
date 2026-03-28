@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.urls import path
-from users.views import CreateUser, ListUser, DeleteUser, DetailUser
+from users.views import CreateUser, ListUser, DeleteUser, DetailUser, UpdateUser
 
 app_name = "users"
 
@@ -8,7 +8,7 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("create_user/", CreateUser.as_view(), name="create_user"),
     path("", ListUser.as_view(), name="list_user"),
-    path("update_user/<int:pk>/", CreateUser.as_view(), name="update_user"),
+    path("update_user/<int:pk>/", UpdateUser.as_view(), name="update_user"),
     path("delete_user/<int:pk>/", DeleteUser.as_view(), name="delete_user"),
     path("detail_user/<int:pk>/", DetailUser.as_view(), name="detail_user")
 ]

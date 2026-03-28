@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from django.urls import reverse_lazy
-from django.views.generic import CreateView, ListView, DeleteView, DetailView
+from django.views.generic import CreateView, ListView, DeleteView, DetailView, UpdateView
 from users.models import CustomUser
 from users.forms import UserForm
 
@@ -11,6 +11,12 @@ class CreateUser(CreateView):
     form_class = UserForm
     template_name = "create_or_update_user.html"
     success_url = reverse_lazy("users:list_user")
+
+class UpdateUser(UpdateView):
+    model = CustomUser
+    form_class = UserForm
+    template_name = 'create_or_update_user.html'
+    success_url = reverse_lazy('users:list_user')
 
 class ListUser(ListView):
     model = CustomUser
