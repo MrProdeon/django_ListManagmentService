@@ -1,0 +1,285 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<main>
+    <section class="py-5">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-md-10 col-lg-8">
+                    <div class="card shadow-lg border-0 rounded-3">
+                        <div class="card-header bg-primary text-white text-center py-4">
+                            <h2 class="h4 mb-0">
+                                <i class="bi bi-send-fill me-2"></i>Детали рассылки
+                            </h2>
+                        </div>
+                        <div class="card-body p-5">
+                            <div class="mailing-details">
+                                <!-- Информация о рассылке -->
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-4">
+                                            <label class="text-muted small text-uppercase fw-semibold mb-2">
+                                                <i class="bi bi-envelope-fill me-1"></i>Сообщение
+                                            </label>
+                                            <div class="p-3 bg-light rounded-3 border">
+                                                <strong>{{ mailing.message.subject_line|default:"Без темы" }}</strong>
+                                                <p class="mb-0 mt-2 small">{{ mailing.message.message_text|truncatewords:30 }}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-4">
+                                            <label class="text-muted small text-uppercase fw-semibold mb-2">
+                                                <i class="bi bi-info-circle me-1"></i>Статус
+                                            </label>
+                                            <div>
+                                                {% if mailing.status == 'created' %}
+                                                    <span class="badge bg-secondary fs-6 p-2">
+                                                        <i class="bi bi-clock me-1"></i>Создана
+                                                    </span>
+                                                {% elif mailing.status == 'started' %}
+                                                    <span class="badge bg-success fs-6 p-2">
+                                                        <i class="bi bi-play-fill me-1"></i>Запущена
+                                                    </span>
+                                                {% else %}
+                                                    <span class="badge bg-danger fs-6 p-2">
+                                                        <i class="bi bi-check-circle-fill me-1"></i>Завершена
+                                                    </span>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Даты -->
+                                <div class="row mt-3">
+                                    <div class="col-md-6">
+                                        <div class="mb-4 p-3 bg-light rounded-3 border h-100">
+                                            <div class="d-flex align-items-center">
+                                                <i class="bi bi-clock-history text-primary fs-3 me-3"></i>
+                                                <div>
+                                                    <label class="text-muted small text-uppercase fw-semibold mb-1 d-block">
+                                                        Время запуска
+                                                    </label>
+                                                    <p class="mb-0">
+                                                        <strong>{{ mailing.start_time|date:"d.m.Y H:i"|default:"-" }}</strong>
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-4 p-3 bg-light rounded-3 border h-100">
+                                            <div class="d-flex align-items-center">
+                                                <i class="bi bi-calendar-check text-warning fs-3 me-3"></i>
+                                                <div>
+                                                    <label class="text-muted small text-uppercase fw-semibold mb-1 d-block">
+                                                        Время окончания
+                                                    </label>
+                                                    <p class="mb-0">
+                                                        <strong>{{ mailing.end_time|date:"d.m.Y H:i"|default:"-" }}</strong>
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Получатели -->
+                                <div class="mb-4">
+                                    <label class="text-muted small text-uppercase fw-semibold mb-2">
+                                        <i class="bi bi-people-fill me-1"></i>Получатели ({{ mailing.recipients.count }})
+                                    </label>
+                                    <div class="recipients-list bg-light p-3 rounded-3 border" style="max-height: 300px; overflow-y: auto;">
+                                        {% for recipient in mailing.recipients.all %}
+                                            <div class="recipient-item d-flex align-items-center justify-content-between p-2 border-bottom">
+                                                <div>
+                                                    <i class="bi bi-person-circle text-primary me-2"></i>
+                                                    <strong>{{ recipient.full_name|default:recipient.email }}</strong>
+                                                    <br>
+                                                    <small class="text-muted ms-4">{{ recipient.email }}</small>
+                                                </div>
+                                                <small class="text-muted">{{ recipient.country|default:"Страна не указана" }}</small>
+                                            </div>
+                                        {% empty %}
+                                            <p class="text-muted text-center mb-0">Нет получателей</p>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+
+                                <!-- Дополнительная информация -->
+                                <div class="row mt-3">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="text-muted small text-uppercase fw-semibold mb-1">
+                                                <i class="bi bi-calendar-plus me-1"></i>Дата создания
+                                            </label>
+                                            <p class="mb-0">
+                                                <strong>{{ mailing.created_at|date:"d.m.Y H:i"|default:"-" }}</strong>
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="text-muted small text-uppercase fw-semibold mb-1">
+                                                <i class="bi bi-calendar-check me-1"></i>Последнее обновление
+                                            </label>
+                                            <p class="mb-0">
+                                                <strong>{{ mailing.updated_at|date:"d.m.Y H:i"|default:"-" }}</strong>
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <hr class="my-5">
+
+                                <!-- Кнопки действий -->
+                                <div class="d-flex justify-content-center gap-3 flex-wrap">
+                                    <a href=""
+                                       class="btn btn-warning btn-lg px-4">
+                                        <i class="bi bi-pencil-square me-2"></i>Редактировать
+                                    </a>
+                                    <a href=""
+                                       class="btn btn-danger btn-lg px-4">
+                                        <i class="bi bi-trash me-2"></i>Удалить
+                                    </a>
+                                    <a href="{% url 'mailing:list_mailing' %}" 
+                                       class="btn btn-secondary btn-lg px-4">
+                                        <i class="bi bi-arrow-left me-2"></i>Вернуться к списку
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+
+<style>
+    /* Стили для карточки */
+    .card {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        overflow: hidden;
+    }
+    
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1) !important;
+    }
+    
+    /* Стили для меток */
+    label {
+        letter-spacing: 0.5px;
+        font-size: 0.75rem;
+    }
+    
+    /* Стили для получателей */
+    .recipients-list {
+        max-height: 300px;
+        overflow-y: auto;
+    }
+    
+    .recipient-item {
+        transition: background-color 0.2s ease;
+    }
+    
+    .recipient-item:hover {
+        background-color: #e9ecef;
+    }
+    
+    .recipient-item:last-child {
+        border-bottom: none !important;
+    }
+    
+    /* Стили для кнопок */
+    .btn {
+        transition: all 0.2s ease;
+        border-radius: 8px;
+    }
+    
+    .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+    
+    .btn:active {
+        transform: translateY(0);
+    }
+    
+    /* Анимация появления */
+    .card {
+        animation: fadeInUp 0.5s ease;
+    }
+    
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    /* Стилизация скролла для списка получателей */
+    .recipients-list::-webkit-scrollbar {
+        width: 8px;
+    }
+    
+    .recipients-list::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 4px;
+    }
+    
+    .recipients-list::-webkit-scrollbar-thumb {
+        background: #888;
+        border-radius: 4px;
+    }
+    
+    .recipients-list::-webkit-scrollbar-thumb:hover {
+        background: #555;
+    }
+    
+    /* Разделитель */
+    hr {
+        opacity: 0.5;
+    }
+    
+    /* Бейджи */
+    .badge {
+        font-size: 0.9rem;
+        padding: 8px 15px;
+        border-radius: 20px;
+    }
+    
+    /* Адаптивность */
+    @media (max-width: 768px) {
+        .card-body {
+            padding: 1.5rem !important;
+        }
+        
+        .btn {
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+        }
+        
+        .badge {
+            font-size: 0.8rem;
+            padding: 5px 10px;
+        }
+        
+        .recipient-item {
+            flex-direction: column;
+            align-items: flex-start !important;
+        }
+        
+        .recipient-item small {
+            margin-top: 5px;
+            margin-left: 24px !important;
+        }
+    }
+</style>
+{% endblock %}
