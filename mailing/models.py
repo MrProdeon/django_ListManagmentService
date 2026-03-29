@@ -1,4 +1,10 @@
+from django.core.exceptions import ValidationError
 from django.db import models
+import datetime
+
+from django.db.models import CASCADE
+from users.models import CustomUser
+
 
 # Create your models here.
 class MessageModel(models.Model):
@@ -9,3 +15,57 @@ class MessageModel(models.Model):
     class Meta:
         verbose_name = "Сообщение"
         verbose_name_plural = "Сообщения"
+
+class MailingModel(models.Model):
+    STATUS_CHOICES = [
+        ('created', 'Создана'),
+        ('started', 'Запущена'),
+        ('completed', 'Завершена'),
+    ]
+
+    start_time = models.DateTimeField(verbose_name="Дата и время запуска рассылки")
+    end_time = models.DateTimeField(verbose_name="Дата и время окончания рассылки")
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES,
+                              default="created", verbose_name="Статус")
+    message = models.ForeignKey(to=MessageModel, on_delete=CASCADE)
+    recipients = models.ManyToManyField(to=CustomUser)
+
+    def clean(self):
+        super().clean()
+
+        if self.start_time and self.start_time < datetime.datetime.now():
+            raise ValidationError({
+                'start_time': 'Время запуска рассылки не может быть в прошлом.'
+            })
+        if self.start_time and self.end_time and self.start_time >= self.end_time:
+            raise ValidationError({
+                'start_time': 'Время окончания рассылки должно быть позже времени запуска.'
+            })
+
+    def save(self, *args, **kwargs):
+        self.clean()
+        super().save(*args, **kwargs)
+
+
+    def update_status(self):
+        now = datetime.datetime.now()
+
+        if now < self.start_time:
+            new_status = "created"
+        elif now > self.end_time:
+            new_status = "completed"
+        elif self.start_time <= now <= self.end_time:
+            new_status = "started"
+
+        if new_status != self.status:
+            self.status = new_status
+            self.save(update_fields=["status"])
+
+        return self.status
+
+    def __str__(self):
+        return f"Рассылка {self.id} - {self.message.subject_line}"
+
+    class Meta:
+        verbose_name = "Рассылка"
+        vervose_plural_name = "Рассылки"
