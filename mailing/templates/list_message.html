@@ -1,0 +1,165 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<main>
+    <section class="py-5 text-center container">
+        <div class="row py-lg-5">
+            <div class="col-lg-6 col-md-8 mx-auto">
+                <h1 class="fw-light display-5">
+                    <i class="bi bi-envelope-paper-fill me-3 text-primary"></i>Список сообщений
+                </h1>
+                <p class="lead text-muted mt-3">
+                    Всего сообщений: <span class="badge bg-primary rounded-pill fs-6">{{ messages|length }}</span>
+                </p>
+                <p>
+                    <a href="{% url 'mailing:create_message' %}" class="btn btn-primary btn-lg px-5 my-2">
+                        <i class="bi bi-plus-circle-fill me-2"></i>Создать сообщение
+                    </a>
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <div class="album py-5 bg-light">
+        <div class="container">
+            <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-4">
+                {% for message in messages %}
+                <div class="col">
+                    <div class="card shadow-sm h-100 border-0 hover-card">
+                        <div class="card-header bg-white border-0 pt-4 px-4">
+                            <div class="d-flex align-items-start justify-content-between">
+                                <h5 class="card-title mb-0 text-truncate fw-bold">
+                                    <i class="bi bi-envelope-fill text-primary me-2"></i>
+                                    {{ message.subject_line|default:"Без темы" }}
+                                </h5>
+                                {% if message.created_at %}
+                                    <small class="text-muted ms-2">{{ message.created_at|date:"d.m.Y" }}</small>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="card-body">
+                            <div class="message-preview mt-2">
+                                <div class="preview-content">
+                                    <i class="bi bi-chat-text-fill text-muted me-2"></i>
+                                    <small class="text-muted">Предпросмотр:</small>
+                                    <p class="mt-2 text-secondary">{{ message.message_text|truncatewords:25|linebreaksbr }}</p>
+                                </div>
+                            </div>
+                            
+                            <div class="d-flex justify-content-between align-items-center mt-4 pt-2">
+                                <div class="btn-group w-100 gap-2">
+                                    <a href="{% url 'mailing:detail_message' message.pk %}" class="btn btn-sm btn-outline-primary">
+                                        <i class="bi bi-eye me-1"></i>Просмотр
+                                    </a>
+                                    <a href="{% url 'mailing:update_message' message.pk%}" class="btn btn-sm btn-outline-warning">
+                                        <i class="bi bi-pencil me-1"></i>Изменить
+                                    </a>
+                                    <a href="{% url 'mailing:delete_message' message.pk%}" class="btn btn-sm btn-outline-danger">
+                                        <i class="bi bi-trash me-1"></i>Удалить
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="card-footer bg-white border-0 pb-4">
+                            <div class="message-stats small text-muted">
+                                <i class="bi bi-file-text-fill me-1"></i>
+                                Длина текста: {{ message.message_text|length }} символов
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="col-12">
+                    <div class="alert alert-info text-center py-5">
+                        <i class="bi bi-envelope-open display-1 mb-3 d-block"></i>
+                        <h4 class="mb-3">Нет сообщений</h4>
+                        <p class="mb-4">Пока нет созданных сообщений для рассылок. Создайте первое сообщение!</p>
+                        <a href="{% url 'mailing:create_message' %}" class="btn btn-primary btn-lg">
+                            <i class="bi bi-plus-circle-fill me-2"></i>Создать сообщение
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</main>
+
+<style>
+    .hover-card {
+        transition: all 0.3s ease;
+        overflow: hidden;
+        border-radius: 12px;
+    }
+    
+    .hover-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 12px 28px rgba(0, 0, 0, 0.15) !important;
+    }
+    
+    .message-preview {
+        background-color: #f8f9fa;
+        padding: 12px;
+        border-radius: 8px;
+        border-left: 3px solid #0d6efd;
+    }
+    
+    .preview-content p {
+        margin-bottom: 0;
+        font-size: 0.9rem;
+        line-height: 1.4;
+    }
+    
+    .btn-group .btn {
+        transition: all 0.2s ease;
+        border-radius: 6px !important;
+    }
+    
+    .btn-group .btn:hover {
+        transform: translateY(-2px);
+    }
+    
+    .message-stats {
+        font-size: 0.8rem;
+        color: #6c757d;
+        border-top: 1px solid #e9ecef;
+        padding-top: 10px;
+    }
+    
+    @media (max-width: 768px) {
+        .btn-group {
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .btn-group .btn {
+            width: 100%;
+        }
+    }
+    
+    .col {
+        animation: fadeInUp 0.5s ease forwards;
+        opacity: 0;
+    }
+    
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    {% for message in messages %}
+    .col:nth-child({{ forloop.counter }}) {
+        animation-delay: {{ forloop.counter|add:-1|stringformat:"0.1f" }}s;
+    }
+    {% endfor %}
+</style>
+{% endblock %}
