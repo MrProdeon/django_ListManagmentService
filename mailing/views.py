@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from django.urls import reverse_lazy
-from django.views.generic import CreateView, ListView, UpdateView, DetailView
+from django.views.generic import CreateView, ListView, UpdateView, DetailView, DeleteView
 from mailing.models import MessageModel
 from mailing.forms import MessageCreateForm
 
@@ -28,4 +28,10 @@ class MessageListView(ListView):
 class MessageDetailView(DetailView):
     model = MessageModel
     template_name = "detail_message.html"
+    context_object_name = "message"
+
+class MessageDeleteView(DeleteView):
+    model = MessageModel
+    template_name = "delete_message.html"
+    success_url = reverse_lazy("mailing:list_message")
     context_object_name = "message"
