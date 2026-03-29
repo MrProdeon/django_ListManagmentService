@@ -1,0 +1,246 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<main>
+    <section class="py-5">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-md-10 col-lg-8">
+                    <div class="card shadow-lg border-0 rounded-3">
+                        <div class="card-header bg-primary text-white text-center py-4">
+                            <h2 class="h4 mb-0">
+                                <i class="bi bi-envelope-paper me-2"></i>Просмотр сообщения
+                            </h2>
+                        </div>
+                        <div class="card-body p-5">
+                            <div class="message-details">
+                                <!-- Тема письма -->
+                                <div class="mb-4">
+                                    <label class="text-muted small text-uppercase fw-semibold mb-2">
+                                        <i class="bi bi-tag me-1"></i>Тема письма
+                                    </label>
+                                    <h3 class="mb-0">{{ message.subject_line|default:"Без темы" }}</h3>
+                                </div>
+                                
+                                <!-- Текст сообщения -->
+                                <div class="mb-4">
+                                    <label class="text-muted small text-uppercase fw-semibold mb-2">
+                                        <i class="bi bi-file-text me-1"></i>Текст сообщения
+                                    </label>
+                                    <div class="message-content bg-light p-4 rounded-3 border">
+                                        <p class="mb-0" style="white-space: pre-wrap; line-height: 1.6;">{{ message.message_text|linebreaksbr }}</p>
+                                    </div>
+                                </div>
+                                
+                                <!-- Информация о создании и обновлении -->
+                                <div class="row mt-4">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="text-muted small text-uppercase fw-semibold mb-1">
+                                                <i class="bi bi-calendar-plus me-1"></i>Дата создания
+                                            </label>
+                                            <p class="mb-0">
+                                                <strong>{{ message.created_at|date:"d.m.Y H:i"|default:"-" }}</strong>
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="text-muted small text-uppercase fw-semibold mb-1">
+                                                <i class="bi bi-calendar-check me-1"></i>Последнее обновление
+                                            </label>
+                                            <p class="mb-0">
+                                                <strong>{{ message.updated_at|date:"d.m.Y H:i"|default:"-" }}</strong>
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Статистика сообщения -->
+                                <div class="message-stats mt-3 p-3 bg-light rounded-3">
+                                    <div class="row text-center">
+                                        <div class="col-md-4">
+                                            <i class="bi bi-file-text-fill text-primary"></i>
+                                            <div>
+                                                <strong>{{ message.message_text|length }}</strong>
+                                                <small class="text-muted"> символов</small>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <i class="bi bi-chat-text-fill text-success"></i>
+                                            <div>
+                                                <strong>{{ message.message_text|wordcount }}</strong>
+                                                <small class="text-muted"> слов</small>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <i class="bi bi-paragraph-fill text-warning"></i>
+                                            <div>
+                                                <strong>{{ message.message_text|linebreaksbr|length }}</strong>
+                                                <small class="text-muted"> строк</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <hr class="my-5">
+                                
+                                <!-- Кнопки действий -->
+                                <div class="d-flex justify-content-center gap-3 flex-wrap">
+                                    <a href="{% url 'mailing:update_message' message.pk %}" 
+                                       class="btn btn-warning btn-lg px-4">
+                                        <i class="bi bi-pencil-square me-2"></i>Редактировать
+                                    </a>
+                                    <a href="{% url 'mailing:delete_message' message.pk %}"
+                                       class="btn btn-danger btn-lg px-4">
+                                        <i class="bi bi-trash me-2"></i>Удалить
+                                    </a>
+                                    <a href="{% url 'mailing:list_message' %}" 
+                                       class="btn btn-secondary btn-lg px-4">
+                                        <i class="bi bi-arrow-left me-2"></i>Вернуться к списку
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+
+<style>
+    /* Стили для карточки */
+    .card {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        overflow: hidden;
+    }
+    
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1) !important;
+    }
+    
+    /* Стили для содержимого сообщения */
+    .message-content {
+        background-color: #f8f9fa;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        max-height: 500px;
+        overflow-y: auto;
+    }
+    
+    /* Стили для меток */
+    label {
+        letter-spacing: 0.5px;
+        font-size: 0.75rem;
+    }
+    
+    /* Стили для статистики */
+    .message-stats {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border-radius: 12px;
+    }
+    
+    .message-stats .col-md-4 {
+        padding: 10px;
+    }
+    
+    .message-stats i {
+        font-size: 1.5rem;
+        margin-bottom: 8px;
+        display: block;
+    }
+    
+    /* Стили для кнопок */
+    .btn {
+        transition: all 0.2s ease;
+        border-radius: 8px;
+    }
+    
+    .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+    
+    .btn:active {
+        transform: translateY(0);
+    }
+    
+    /* Анимация появления */
+    .card {
+        animation: fadeInUp 0.5s ease;
+    }
+    
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    /* Стилизация скролла для содержимого */
+    .message-content::-webkit-scrollbar {
+        width: 8px;
+    }
+    
+    .message-content::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 4px;
+    }
+    
+    .message-content::-webkit-scrollbar-thumb {
+        background: #888;
+        border-radius: 4px;
+    }
+    
+    .message-content::-webkit-scrollbar-thumb:hover {
+        background: #555;
+    }
+    
+    /* Разделитель */
+    hr {
+        opacity: 0.5;
+    }
+    
+    /* Адаптивность */
+    @media (max-width: 768px) {
+        .card-body {
+            padding: 1.5rem !important;
+        }
+        
+        .btn {
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+        }
+        
+        .message-stats .col-md-4 {
+            margin-bottom: 15px;
+        }
+        
+        .message-stats .col-md-4:last-child {
+            margin-bottom: 0;
+        }
+        
+        h3 {
+            font-size: 1.3rem;
+        }
+    }
+    
+    /* Стили для цитат и форматирования */
+    blockquote {
+        border-left: 4px solid #0d6efd;
+        padding-left: 15px;
+        margin: 10px 0;
+        color: #6c757d;
+    }
+    
+    /* Улучшенная читаемость */
+    .message-content p {
+        font-size: 1rem;
+    }
+</style>
+{% endblock %}
