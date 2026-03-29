@@ -68,4 +68,4 @@ class MailingModel(models.Model):
 
     class Meta:
         verbose_name = "Рассылка"
-        vervose_plural_name = "Рассылки"
+        verbose_name_plural = "Рассылки"
