@@ -1,3 +1,5 @@
+from django.utils import timezone
+
 from django.core.exceptions import ValidationError
 from django.db import models
 import datetime
@@ -33,7 +35,7 @@ class MailingModel(models.Model):
     def clean(self):
         super().clean()
 
-        if self.start_time and self.start_time < datetime.datetime.now():
+        if self.start_time and self.start_time < timezone.now():
             raise ValidationError({
                 'start_time': 'Время запуска рассылки не может быть в прошлом.'
             })
@@ -48,7 +50,7 @@ class MailingModel(models.Model):
 
 
     def update_status(self):
-        now = datetime.datetime.now()
+        now = timezone.now()
 
         if now < self.start_time:
             new_status = "created"
