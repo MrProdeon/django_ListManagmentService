@@ -64,7 +64,7 @@
                     <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
                     <circle cx="12" cy="13" r="4"></circle>
                 </svg>
-                <strong>Управление пользователями</strong>
+                <strong>Сервис рассылок</strong>
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
@@ -72,10 +72,16 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'users:list_user' %}">Список</a>
+                        <a class="nav-link" href="{% url 'users:list_user' %}">Список пользователей</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'users:create_user' %}">Создать</a>
+                        <a class="nav-link" href="{% url 'users:create_user' %}">Создать пользователя</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'mailing:list_message' %}">Список сообщений</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'mailing:create_message' %}">Создать сообщение</a>
                     </li>
                 </ul>
             </div>
