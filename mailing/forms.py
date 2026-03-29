@@ -3,4 +3,7 @@ from mailing.models import MessageModel
 
 
 class MessageCreateForm(ModelForm):
-    model = MessageModel
+
+    class Meta:
+        model = MessageModel
+        fields = ['subject_line', 'message_text']
