@@ -59,3 +59,9 @@ class MailingListView(ListView):
     model = MailingModel
     context_object_name = "mailings"
     template_name = "list_mailing.html"
+
+class MailingDeleteView(DeleteView):
+    model = MailingModel
+    template_name = "delete_mailing.html"
+    success_url = reverse_lazy("mailing:list_mailing")
+    context_object_name = "mailing"
