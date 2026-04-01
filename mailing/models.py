@@ -18,6 +18,9 @@ class MessageModel(models.Model):
         verbose_name = "Сообщение"
         verbose_name_plural = "Сообщения"
 
+    def __str__(self):
+        return self.subject_line
+
 class MailingModel(models.Model):
     STATUS_CHOICES = [
         ('created', 'Создана'),
