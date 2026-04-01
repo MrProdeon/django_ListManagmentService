@@ -1,15 +1,15 @@
 import os
 
 from django.shortcuts import get_object_or_404, redirect
-from pyexpat.errors import messages
+from django.contrib import messages
 from django.core.mail import send_mail
 
-from mailing.models import MailingModel
+from mailing.models import MailingModel, AttemptToSend
 from django.utils import timezone
 
 
 def start_mailing(request, pk):
-    mailing = get_object_or_404(MailingModel,pk)
+    mailing = get_object_or_404(MailingModel,pk=pk)
     now = timezone.now()
 
     if now < mailing.start_time:
@@ -21,20 +21,24 @@ def start_mailing(request, pk):
         return redirect('mailing:detail_mailing', pk=pk)
 
     elif mailing.start_time <= now <= mailing.end_time:
-        messages.succes("Рассылка запущена")
+        messages.success(request, "Рассылка запущена")
 
-        subject = mailing_object.message.subject_line
-        message = mailing_object.message.message_text
-        recipient_list = [recipient.email for recepient in mailing_object.recipients]
+        subject = mailing.message.subject_line
+        message = mailing.message.message_text
+        recipient_list = [recipient.email for recipient in mailing.recipients.all()]
 
         for recipient in recipient_list:
             try:
-                send = send_mail(subject, message,
-                             os.getenv("DEFAULT_FROM_EMAIL"), [recipient],
+                send_mail(subject, message, os.getenv("DEFAULT_FROM_EMAIL"), [recipient],
                              fail_silently=False)
-                # Запись в бд об успехе
+                attempt = AttemptToSend.objects.create(attempt_time=now, status="succes",
+                                                       server_response="Письмо отправлено", mailing=mailing)
+                attempt.save()
+
             except Exception as e:
-                pass # Запись в бд об ошибке
+                attempt = AttemptToSend.objects.create(attempt_time=now, status="unsucces",
+                                                       server_response=f"Ошибка: {e}", mailing=mailing)
+                attempt.save()
 
 
     return redirect('mailing:detail_mailing', pk=pk)
