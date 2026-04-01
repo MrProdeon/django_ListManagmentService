@@ -32,21 +32,19 @@ class MailingModel(models.Model):
     message = models.ForeignKey(to=MessageModel, on_delete=CASCADE)
     recipients = models.ManyToManyField(to=CustomUser)
 
-    def clean(self):
-        super().clean()
-
-        if self.start_time and self.start_time < timezone.now():
-            raise ValidationError({
-                'start_time': 'Время запуска рассылки не может быть в прошлом.'
-            })
-        if self.start_time and self.end_time and self.start_time >= self.end_time:
-            raise ValidationError({
-                'start_time': 'Время окончания рассылки должно быть позже времени запуска.'
-            })
-
-    def save(self, *args, **kwargs):
-        self.clean()
-        super().save(*args, **kwargs)
+    # def clean(self):
+    #     super().clean()
+    #
+    #     if self.start_time and self.start_time < timezone.now():
+    #         messages.error(request, "Время рассылки истекло")
+    #     if self.start_time and self.end_time and self.start_time >= self.end_time:
+    #         raise ValidationError({
+    #             'start_time': 'Время окончания рассылки должно быть позже времени запуска.'
+    #         })
+    #
+    # def save(self, *args, **kwargs):
+    #     self.clean()
+    #     super().save(*args, **kwargs)
 
 
     def update_status(self):
@@ -80,5 +78,5 @@ class AttemptToSend(models.Model):
 
     attempt_time = models.DateTimeField(verbose_name="Дата и время попытки")
     status = models.CharField(max_length=15, choices=STATUS_CHOICES)
-    server_response = models.TextField
+    server_response = models.TextField()
     mailing = models.ForeignKey(to=MailingModel, on_delete=CASCADE)
