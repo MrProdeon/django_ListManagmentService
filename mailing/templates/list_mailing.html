@@ -211,13 +211,7 @@
             transform: translateY(0);
         }
     }
-    
-    /* Задержки анимации для каждой карточки */
-    {% for mailing in mailings %}
-    .col:nth-child({{ forloop.counter }}) {
-        animation-delay: {{ forloop.counter|add:-1|stringformat:"0.1f" }}s;
-    }
-    {% endfor %}
+
     
     /* Адаптивность */
     @media (max-width: 768px) {
