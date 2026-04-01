@@ -1,8 +1,11 @@
 from django.shortcuts import render
 from django.urls import reverse_lazy
-from django.views.generic import CreateView, ListView, UpdateView, DetailView, DeleteView
+from django.views.generic import CreateView, ListView, UpdateView, DetailView, DeleteView, TemplateView
 from mailing.models import MessageModel, MailingModel
 from mailing.forms import MessageCreateForm, MailingCreateForm
+from django.views import View
+from django.utils import timezone
+from users.models import CustomUser
 
 
 # Create your views here.
@@ -70,3 +73,23 @@ class MailingDeleteView(DeleteView):
     template_name = "delete_mailing.html"
     success_url = reverse_lazy("mailing:list_mailing")
     context_object_name = "mailing"
+
+class MailingMainView(TemplateView):
+    template_name = "main_mailing.html"
+
+    def get_context_data(self, **kwargs):
+        now = timezone.now()
+        context = super().get_context_data(**kwargs)
+
+        mailing_counter = MailingModel.objects.count()
+        active_mailing_count = MailingModel.objects.filter(
+            start_time__lte=now,
+            end_time__gte=now,
+            status="started"
+        ).count()
+        user_count = CustomUser.objects.count()
+        context["mailing_counter"] = mailing_counter
+        context["active_mailing_count"] = active_mailing_count
+        context["user_count"] = user_count
+
+        return context
