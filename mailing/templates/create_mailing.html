@@ -1,0 +1,197 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<main>
+    <section class="py-5">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-md-8 col-lg-7">
+                    <div class="card shadow-lg border-0 rounded-3">
+                        <div class="card-header bg-primary text-white text-center py-4">
+                            <h2 class="h4 mb-0">
+                                <i class="bi bi-send-plus me-2"></i>Создание рассылки
+                            </h2>
+                        </div>
+                        <div class="card-body p-5">
+                            <form method="post" class="needs-validation" novalidate>
+                                {% csrf_token %}
+
+                                {{ form.as_p }}
+
+                                <div class="d-flex justify-content-between gap-2 mt-4">
+                                    <a href="{% url 'mailing:list_mailing' %}" class="btn btn-secondary btn-lg px-4">
+                                        <i class="bi bi-arrow-left me-2"></i>Отмена
+                                    </a>
+                                    <button type="submit" class="btn btn-primary btn-lg px-5">
+                                        <i class="bi bi-check-lg me-2"></i>Создать
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+
+<style>
+    /* Стилизация формы для as_p */
+    form p {
+        margin-bottom: 1.5rem;
+    }
+
+    form label {
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        display: block;
+        color: #212529;
+    }
+
+    form label .required {
+        color: #dc3545;
+    }
+
+    /* Стили для всех полей ввода */
+    form input:not([type="checkbox"]):not([type="radio"]),
+    form select,
+    form textarea {
+        width: 100%;
+        padding: 10px 12px;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        transition: all 0.2s ease;
+        font-size: 1rem;
+    }
+
+    form input:focus,
+    form select:focus,
+    form textarea:focus {
+        border-color: #86b7fe;
+        outline: 0;
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+    }
+
+    /* Стили для select multiple */
+    form select[multiple] {
+        min-height: 150px;
+    }
+
+    /* Стили для текстовых полей */
+    form textarea {
+        resize: vertical;
+        min-height: 100px;
+    }
+
+    /* Стили для datetime-local */
+    form input[type="datetime-local"] {
+        width: 100%;
+    }
+
+    /* Стили для чекбоксов */
+    form input[type="checkbox"],
+    form input[type="radio"] {
+        width: auto;
+        margin-right: 8px;
+    }
+
+    /* Стили для ошибок */
+    form .errorlist {
+        list-style: none;
+        padding: 0;
+        margin-top: 8px;
+    }
+
+    form .errorlist li {
+        color: #dc3545;
+        font-size: 0.875rem;
+        padding: 6px 12px;
+        background-color: #f8d7da;
+        border-radius: 6px;
+        margin-bottom: 4px;
+    }
+
+    /* Стили для help_text */
+    form .helptext {
+        font-size: 0.75rem;
+        color: #6c757d;
+        margin-top: 5px;
+        display: block;
+    }
+
+    /* Стили для карточки */
+    .card {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1) !important;
+    }
+
+    /* Стили для кнопок */
+    .btn {
+        transition: all 0.2s ease;
+        border-radius: 8px;
+    }
+
+    .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    /* Адаптивность */
+    @media (max-width: 768px) {
+        .card-body {
+            padding: 1.5rem !important;
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+        }
+    }
+</style>
+
+<script>
+    // Клиентская валидация для datetime-local
+    document.addEventListener('DOMContentLoaded', function() {
+        const startTimeInput = document.querySelector('input[name="start_time"]');
+        const endTimeInput = document.querySelector('input[name="end_time"]');
+
+        if (startTimeInput && endTimeInput) {
+            // Устанавливаем минимальную дату для start_time (текущее время)
+            const now = new Date();
+            now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+            const minDateTime = now.toISOString().slice(0, 16);
+            startTimeInput.min = minDateTime;
+
+            // Валидация при изменении start_time
+            startTimeInput.addEventListener('change', function() {
+                if (endTimeInput.value && this.value >= endTimeInput.value) {
+                    endTimeInput.setCustomValidity('Время окончания должно быть позже времени запуска');
+                } else {
+                    endTimeInput.setCustomValidity('');
+                }
+            });
+
+            // Валидация при изменении end_time
+            endTimeInput.addEventListener('change', function() {
+                if (startTimeInput.value && this.value <= startTimeInput.value) {
+                    this.setCustomValidity('Время окончания должно быть позже времени запуска');
+                } else {
+                    this.setCustomValidity('');
+                }
+            });
+        }
+
+        // Добавляем звездочку для обязательных полей
+        const requiredFields = document.querySelectorAll('[required]');
+        requiredFields.forEach(function(field) {
+            const label = document.querySelector(`label[for="${field.id}"]`);
+            if (label && !label.querySelector('.required')) {
+                label.innerHTML = label.innerHTML + ' <span class="required">*</span>';
+            }
+        });
+    });
+</script>
+{% endblock %}

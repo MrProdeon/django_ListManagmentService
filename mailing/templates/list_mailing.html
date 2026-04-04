@@ -1,0 +1,255 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<main>
+    <section class="py-5 text-center container">
+        <div class="row py-lg-5">
+            <div class="col-lg-6 col-md-8 mx-auto">
+                <h1 class="fw-light display-5">
+                    <i class="bi bi-envelope-paper-fill me-3 text-primary"></i>Список рассылок
+                </h1>
+                <p class="lead text-muted mt-3">
+                    Всего рассылок: <span class="badge bg-primary rounded-pill fs-6">{{ mailings|length }}</span>
+                </p>
+                <p>
+                    <a href="{% url 'mailing:create_mailing' %}" class="btn btn-primary btn-lg px-5 my-2">
+                        <i class="bi bi-plus-circle-fill me-2"></i>Создать рассылку
+                    </a>
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <div class="album py-5 bg-light">
+        <div class="container">
+            <div class="row row-cols-1 row-cols-sm-2 row-cols-md-2 g-4">
+                {% for mailing in mailings %}
+                <div class="col">
+                    <div class="card shadow-sm h-100 border-0 hover-card">
+                        <div class="card-header bg-white border-0 pt-4 px-4">
+                            <div class="d-flex align-items-start justify-content-between">
+                                <h5 class="card-title mb-0 text-truncate fw-bold">
+                                    <i class="bi bi-send-fill text-primary me-2"></i>
+                                    {{ mailing.message.subject_line|default:"Без темы" }}
+                                </h5>
+                                {% if mailing.status == 'created' %}
+                                    <span class="badge bg-secondary">
+                                        <i class="bi bi-clock me-1"></i>Создана
+                                    </span>
+                                {% elif mailing.status == 'started' %}
+                                    <span class="badge bg-success">
+                                        <i class="bi bi-play-fill me-1"></i>Запущена
+                                    </span>
+                                {% else %}
+                                    <span class="badge bg-danger">
+                                        <i class="bi bi-check-circle-fill me-1"></i>Завершена
+                                    </span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="card-body">
+                            <div class="mailing-info mt-2">
+                                <div class="info-item">
+                                    <i class="bi bi-envelope-fill text-primary me-2"></i>
+                                    <span class="text-truncate">{{ mailing.message.subject_line|default:"Без темы" }}</span>
+                                </div>
+                                <div class="info-item">
+                                    <i class="bi bi-clock-history text-info me-2"></i>
+                                    <span>Старт: {{ mailing.start_time|date:"d.m.Y H:i" }}</span>
+                                </div>
+                                <div class="info-item">
+                                    <i class="bi bi-calendar-check text-warning me-2"></i>
+                                    <span>Финиш: {{ mailing.end_time|date:"d.m.Y H:i" }}</span>
+                                </div>
+                                <div class="info-item">
+                                    <i class="bi bi-people-fill text-success me-2"></i>
+                                    <span>Получателей: {{ mailing.recipients.count }}</span>
+                                </div>
+                            </div>
+                            
+                            <div class="d-flex justify-content-between align-items-center mt-4 pt-2">
+                                <div class="btn-group w-100 gap-2">
+                                    <a href="{% url 'mailing:detail_mailing' mailing.pk %}" class="btn btn-sm btn-outline-primary">
+                                        <i class="bi bi-eye me-1"></i>Просмотр
+                                    </a>
+                                    <a href="{% url 'mailing:update_mailing' mailing.pk %}" class="btn btn-sm btn-outline-warning">
+                                        <i class="bi bi-pencil me-1"></i>Изменить
+                                    </a>
+                                    <a href="{% url 'mailing:delete_mailing' mailing.pk %}" class="btn btn-sm btn-outline-danger">
+                                        <i class="bi bi-trash me-1"></i>Удалить
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="card-footer bg-white border-0 pb-4">
+                            <div class="mailing-stats small text-muted">
+                                <i class="bi bi-calendar-plus me-1"></i>
+                                Создана: {{ mailing.created_at|date:"d.m.Y"|default:"-" }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="col-12">
+                    <div class="alert alert-info text-center py-5">
+                        <i class="bi bi-envelope-open display-1 mb-3 d-block"></i>
+                        <h4 class="mb-3">Нет рассылок</h4>
+                        <p class="mb-4">Пока нет созданных рассылок. Создайте первую рассылку!</p>
+                        <a href="{% url 'mailing:create_mailing' %}" class="btn btn-primary btn-lg">
+                            <i class="bi bi-plus-circle-fill me-2"></i>Создать рассылку
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</main>
+
+<style>
+    /* Стили для карточек */
+    .hover-card {
+        transition: all 0.3s ease;
+        overflow: hidden;
+        border-radius: 12px;
+    }
+    
+    .hover-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 12px 28px rgba(0, 0, 0, 0.15) !important;
+    }
+    
+    /* Стили для информации */
+    .mailing-info {
+        border-top: 1px solid #e9ecef;
+        border-bottom: 1px solid #e9ecef;
+        padding: 12px 0;
+    }
+    
+    .info-item {
+        display: flex;
+        align-items: center;
+        margin-bottom: 8px;
+        font-size: 0.9rem;
+    }
+    
+    .info-item:last-child {
+        margin-bottom: 0;
+    }
+    
+    .info-item i {
+        min-width: 24px;
+        font-size: 1rem;
+    }
+    
+    .info-item span {
+        color: #6c757d;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+    
+    /* Стили для кнопок */
+    .btn-group .btn {
+        transition: all 0.2s ease;
+        border-radius: 6px !important;
+    }
+    
+    .btn-group .btn:hover {
+        transform: translateY(-2px);
+    }
+    
+    .btn-outline-primary:hover {
+        background-color: #0d6efd;
+        color: white;
+    }
+    
+    .btn-outline-warning:hover {
+        background-color: #ffc107;
+        color: white;
+    }
+    
+    .btn-outline-danger:hover {
+        background-color: #dc3545;
+        color: white;
+    }
+    
+    /* Стили для бейджей */
+    .badge {
+        font-size: 0.75rem;
+        padding: 5px 10px;
+        border-radius: 20px;
+    }
+    
+    /* Стили для пустого состояния */
+    .alert-info {
+        background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%);
+        border: none;
+        border-radius: 12px;
+    }
+    
+    .alert-info i {
+        color: #0d6efd;
+        opacity: 0.7;
+    }
+    
+    /* Анимация появления карточек */
+    .col {
+        animation: fadeInUp 0.5s ease forwards;
+        opacity: 0;
+    }
+    
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    
+    /* Адаптивность */
+    @media (max-width: 768px) {
+        .btn-group {
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .btn-group .btn {
+            width: 100%;
+        }
+        
+        .info-item {
+            font-size: 0.85rem;
+        }
+        
+        .display-5 {
+            font-size: 2rem;
+        }
+        
+        .badge {
+            font-size: 0.7rem;
+        }
+    }
+    
+    /* Обрезка текста */
+    .text-truncate {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    
+    /* Стили для футера карточки */
+    .mailing-stats {
+        font-size: 0.8rem;
+        color: #6c757d;
+        border-top: 1px solid #e9ecef;
+        padding-top: 10px;
+    }
+</style>
+{% endblock %}
