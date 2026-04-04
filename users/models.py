@@ -1,5 +1,10 @@
+import uuid
+
 from django.db import models
 from django.contrib.auth.models import AbstractUser, BaseUserManager
+from django.db.models import CASCADE
+from django.utils import timezone
+
 
 # Create your models here.
 class CustomUserManager(BaseUserManager):
@@ -39,6 +44,7 @@ class CustomUser(AbstractUser):
 
 
     email = models.EmailField(unique=True, verbose_name="Электронная почта")
+    is_email_verified = models.BooleanField(default=False, verbose_name="Подтвержден ли email")
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = []
 
@@ -51,3 +57,15 @@ class CustomUser(AbstractUser):
         verbose_name = "Пользователь"
         verbose_name_plural = "Пользователи"
 
+class EmailVerifiedToken(models.Model):
+    user = models.OneToOneField(to=CustomUser, on_delete=CASCADE, verbose_name="Пользователь")
+    token = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    @staticmethod
+    def is_valid(self):
+        expire_time = timezone.now() + timezone.timedelta(hours=24)
+        return timezone.now() <= expire_time
+
+    def __str__(self):
+        return f"Токен для {self.user.email}"
