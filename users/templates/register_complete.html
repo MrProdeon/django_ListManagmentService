@@ -1,0 +1,27 @@
+<!-- users/templates/registration_complete.html -->
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h4>Регистрация успешна!</h4>
+                </div>
+                <div class="card-body">
+                    <p>На ваш email отправлено письмо с ссылкой для подтверждения.</p>
+                    <p>Пожалуйста, перейдите по ссылке, чтобы активировать аккаунт.</p>
+                    <hr>
+                    <p class="text-muted small">
+                        Не получили письмо?
+                        <a href="{% url 'users:resend_verification' user_id %}">
+                            Отправить повторно
+                        </a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

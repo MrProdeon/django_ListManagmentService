@@ -63,7 +63,7 @@ class EmailVerifiedToken(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     @staticmethod
-    def is_valid(self):
+    def is_valid():
         expire_time = timezone.now() + timezone.timedelta(hours=24)
         return timezone.now() <= expire_time
 

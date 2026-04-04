@@ -1,0 +1,22 @@
+<!-- users/templates/verification_success.html -->
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h4>Email подтвержден!</h4>
+                </div>
+                <div class="card-body">
+                    <p>Ваш email успешно подтвержден. Теперь вы можете войти в систему.</p>
+                    <a href="{% url 'users:login' %}" class="btn btn-primary">
+                        Войти
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
