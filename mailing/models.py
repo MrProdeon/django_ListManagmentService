@@ -13,6 +13,8 @@ class MessageModel(models.Model):
 
     subject_line = models.CharField(max_length=255, blank=True, null=True, verbose_name="Тема письма")
     message_text = models.TextField(verbose_name="Текст сообщения")
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата создания")
+    updated_at = models.DateTimeField(auto_now=True, verbose_name="Дата обновления")
 
     class Meta:
         verbose_name = "Сообщение"
@@ -34,6 +36,8 @@ class MailingModel(models.Model):
                               default="created", verbose_name="Статус")
     message = models.ForeignKey(to=MessageModel, on_delete=CASCADE)
     recipients = models.ManyToManyField(to=CustomUser)
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата создания")
+    updated_at = models.DateTimeField(auto_now=True, verbose_name="Дата обновления")
 
     # def clean(self):
     #     super().clean()
