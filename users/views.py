@@ -1,8 +1,9 @@
+from django.contrib.auth.views import LoginView
 from django.shortcuts import render
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, ListView, DeleteView, DetailView, UpdateView
 from users.models import CustomUser
-from users.forms import UserForm, CustomUserCreationForm
+from users.forms import UserForm, CustomUserCreationForm, CustomAuthenticationForm
 from django.views import View
 
 # Create your views here.
@@ -39,3 +40,7 @@ class RegisterView(CreateView):
     form_class = CustomUserCreationForm
     template_name = "register.html"
     success_url = reverse_lazy("mailing:mailing_main")
+
+class CustomLoginView(LoginView):
+    authentication_form = CustomAuthenticationForm
+    template_name = "login.html"
