@@ -57,6 +57,35 @@ class CustomUser(AbstractUser):
         verbose_name = "Пользователь"
         verbose_name_plural = "Пользователи"
 
+
+class Recipient(models.Model):
+    first_name = None
+    last_name = None
+    username = None
+
+    full_name = models.CharField(max_length=150, verbose_name="Ф.И.О.")
+    phone_number = models.CharField(max_length=15, verbose_name="Номер телефона")
+    comment = models.TextField(blank=True, verbose_name="Комментарий")
+    avatar = models.ImageField(blank=True, null=True, verbose_name="Аватар")
+    country = models.CharField(max_length=50, verbose_name="Страна")
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата создания")
+    updated_at = models.DateTimeField(auto_now=True, verbose_name="Дата обновления")
+
+
+    email = models.EmailField(unique=True, verbose_name="Электронная почта")
+    is_email_verified = models.BooleanField(default=False, verbose_name="Подтвержден ли email")
+    USERNAME_FIELD = "email"
+    REQUIRED_FIELDS = []
+
+    objects = CustomUserManager()
+
+    def __str__(self):
+        return self.email
+
+    class Meta:
+        verbose_name = "Получатель рассылки"
+        verbose_name_plural = "Получатели рассылки"
+
 class EmailVerifiedToken(models.Model):
     user = models.OneToOneField(to=CustomUser, on_delete=CASCADE, verbose_name="Пользователь")
     token = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)

@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="Список пользователей">
     <meta name="author" content="Ваше имя">
-    <title>Список пользователей</title>
+    <title>Список получателей</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
@@ -71,10 +71,10 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'users:list_user' %}">Список пользователей</a>
+                        <a class="nav-link" href="{% url 'users:list_recipient' %}">Список получателей</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'users:create_user' %}">Создать пользователя</a>
+                        <a class="nav-link" href="{% url 'users:create_recipient' %}">Создать получателей</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'mailing:list_message' %}">Список сообщений</a>
@@ -101,7 +101,7 @@
         <p class="float-end mb-1">
             <a href="#">Вернуться наверх</a>
         </p>
-        <p class="mb-1">Система управления пользователями © {% now "Y" %}</p>
+        <p class="mb-1">Система управления рассылками © {% now "Y" %}</p>
     </div>
 </footer>
 

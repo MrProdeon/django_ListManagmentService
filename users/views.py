@@ -2,41 +2,42 @@ from django.contrib.auth.views import LoginView
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, ListView, DeleteView, DetailView, UpdateView
-from users.models import CustomUser, EmailVerifiedToken
-from users.forms import UserForm, CustomUserCreationForm, CustomAuthenticationForm
+from users.models import CustomUser, EmailVerifiedToken, Recipient
+from users.forms import RecipientForm, CustomUserCreationForm, CustomAuthenticationForm
 from django.views import View
 from users.services import send_verification_email
 from django.contrib import messages
 
-# Create your views here.
+# RECIPIENTS
+class CreateRecipient(CreateView):
+    model = Recipient
+    form_class = RecipientForm
+    template_name = "create_or_update_recipient.html"
+    success_url = reverse_lazy("users:list_recipient")
 
-class CreateUser(CreateView):
-    model = CustomUser
-    form_class = UserForm
-    template_name = "create_or_update_user.html"
-    success_url = reverse_lazy("users:list_user")
+class UpdateRecipient(UpdateView):
+    model = Recipient
+    form_class = RecipientForm
+    template_name = 'create_or_update_recipient.html'
+    success_url = reverse_lazy('users:list_recipient')
 
-class UpdateUser(UpdateView):
-    model = CustomUser
-    form_class = UserForm
-    template_name = 'create_or_update_user.html'
-    success_url = reverse_lazy('users:list_user')
-
-class ListUser(ListView):
-    model = CustomUser
-    template_name = "list_user.html"
+class ListRecipient(ListView):
+    model = Recipient
+    template_name = "list_recipient.html"
     context_object_name = "users"
 
-class DeleteUser(DeleteView):
-    model = CustomUser
+class DeleteRecipient(DeleteView):
+    model = Recipient
     template_name = "confirm_delete.html"
-    success_url = reverse_lazy("users:list_user")
+    success_url = reverse_lazy("users:list_recipient")
     context_object_name = "user"
 
-class DetailUser(DetailView):
-    model = CustomUser
-    template_name = "detail_user.html"
+class DetailRecipient(DetailView):
+    model = Recipient
+    template_name = "detail_recipient.html"
     context_object_name = "user"
+
+# USERS
 
 class RegisterView(CreateView):
     form_class = CustomUserCreationForm

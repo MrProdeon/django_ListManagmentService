@@ -1,13 +1,15 @@
 from django.forms import ModelForm
-from users.models import CustomUser
+from users.models import CustomUser, Recipient
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django import forms
 
-class UserForm(ModelForm):
+#RECIPIENTS
+class RecipientForm(ModelForm):
     class Meta:
-        model = CustomUser
+        model = Recipient
         fields = ["full_name", "phone_number", "country", "email", "avatar"]
 
+#USERS
 class CustomUserCreationForm(UserCreationForm):
     class Meta(UserCreationForm.Meta):
         model = CustomUser

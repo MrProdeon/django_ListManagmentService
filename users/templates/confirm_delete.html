@@ -18,7 +18,7 @@
                                      style="width: 80px; height: 80px;">
                                     <i class="bi bi-person-x display-4 text-danger"></i>
                                 </div>
-                                <h5 class="mb-3">Вы уверены, что хотите удалить пользователя?</h5>
+                                <h5 class="mb-3">Вы уверены, что хотите удалить получателя?</h5>
                                 <div class="alert alert-warning">
                                     <strong>{{ user.full_name|default:user.email }}</strong>
                                     {% if user.email and user.full_name %}
@@ -29,14 +29,14 @@
                                 </div>
                                 <p class="text-muted small">
                                     <i class="bi bi-info-circle me-1"></i>
-                                    Это действие невозможно отменить. Все данные пользователя будут безвозвратно удалены.
+                                    Это действие невозможно отменить. Все данные получателя будут безвозвратно удалены.
                                 </p>
                             </div>
                             
                             <form method="post">
                                 {% csrf_token %}
                                 <div class="d-flex justify-content-center gap-3">
-                                    <a href="{% url 'users:detail_user' user.pk %}" class="btn btn-secondary btn-lg px-4">
+                                    <a href="{% url 'users:detail_recipient' user.pk %}" class="btn btn-secondary btn-lg px-4">
                                         <i class="bi bi-arrow-left me-2"></i>Отмена
                                     </a>
                                     <button type="submit" class="btn btn-danger btn-lg px-4">
@@ -48,8 +48,8 @@
                     </div>
                     
                     <div class="text-center mt-4">
-                        <a href="{% url 'users:list_user' %}" class="text-decoration-none">
-                            <i class="bi bi-arrow-return-left me-1"></i>Вернуться к списку пользователей
+                        <a href="{% url 'users:list_recipient' %}" class="text-decoration-none">
+                            <i class="bi bi-arrow-return-left me-1"></i>Вернуться к списку получателей
                         </a>
                     </div>
                 </div>
@@ -190,7 +190,7 @@
         if (deleteForm && deleteButton) {
             deleteForm.addEventListener('submit', function(event) {
                 // Двойное подтверждение
-                const confirmDelete = confirm('Вы действительно хотите удалить пользователя {{ user.full_name|default:user.email }}?\n\nЭто действие невозможно отменить!');
+                const confirmDelete = confirm('Вы действительно хотите удалить получателя {{ user.full_name|default:user.email }}?\n\nЭто действие невозможно отменить!');
                 if (!confirmDelete) {
                     event.preventDefault();
                 }
