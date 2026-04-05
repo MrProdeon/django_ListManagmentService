@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.contrib.auth.views import LogoutView
 from django.urls import path
 from django.views.generic import TemplateView
 
@@ -22,5 +23,7 @@ urlpatterns = [
     path("register/succes_verify/", TemplateView.as_view(template_name="success_verify.html"), name="success_verify"),
     path("verify/<uuid:token>/", VerifyEmailView.as_view(), name='verify_email'),
     path("resend/<int:user_id>", ResendVerificationView.as_view(), name="resend_verification"),
-    path("login/", CustomLoginView.as_view(), name="login")
+    path("login/", CustomLoginView.as_view(), name="login"),
+    path("logout/", LogoutView.as_view(), name="logout"),
+
 ]
