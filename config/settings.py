@@ -12,6 +12,8 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 
 from pathlib import Path
 import os
+
+from django.conf.global_settings import LOGIN_URL
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -140,3 +142,9 @@ EMAIL_USE_SSL =  os.getenv("EMAIL_USE_SSL", "False").lower() == "true"
 EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
 EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
 DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL")
+
+LOGIN_URL = "users:login"
+LOGIN_REDIRECT_URL = "mailing:mailing_main"
+LOGOUT_REDIRECT_URL = 'mailing:mailing_main'
+
+SITE_URL = 'http://127.0.0.1:8000/'

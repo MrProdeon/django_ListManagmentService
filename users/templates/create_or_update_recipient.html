@@ -57,7 +57,7 @@
                                 {% endfor %}
                                 
                                 <div class="d-flex justify-content-between gap-2 mt-4">
-                                    <a href="{% url 'users:list_user' %}" class="btn btn-secondary btn-lg px-4">
+                                    <a href="{% url 'users:list_recipient' %}" class="btn btn-secondary btn-lg px-4">
                                         <i class="bi bi-arrow-left me-2"></i>Отмена
                                     </a>
                                     <button type="submit" class="btn btn-primary btn-lg px-5">
@@ -71,7 +71,7 @@
                     
                     {% if form.instance.pk %}
                     <div class="text-center mt-4">
-                        <a href="{% url 'users:detail_user' form.instance.pk %}" class="text-decoration-none">
+                        <a href="{% url 'users:detail_recipient' form.instance.pk %}" class="text-decoration-none">
                             <i class="bi bi-eye me-1"></i>Вернуться к просмотру
                         </a>
                     </div>
