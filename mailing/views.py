@@ -1,11 +1,15 @@
+from itertools import count
+
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import render
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, ListView, UpdateView, DetailView, DeleteView, TemplateView
-from mailing.models import MessageModel, MailingModel
+from mailing.models import MessageModel, MailingModel, AttemptToSend
 from mailing.forms import MessageCreateForm, MailingCreateForm
 from django.views import View
 from django.utils import timezone
 from users.models import CustomUser
+from django.db.models import Count
 
 
 # Create your views here.
@@ -91,5 +95,25 @@ class MailingMainView(TemplateView):
         context["mailing_counter"] = mailing_counter
         context["active_mailing_count"] = active_mailing_count
         context["user_count"] = user_count
+
+        return context
+
+class ReportView(LoginRequiredMixin, TemplateView):
+    template_name = "report.html"
+
+    def get_context_data(self, **kwargs):
+        user = self.request.user
+
+        context = super().get_context_data(**kwargs)
+
+        user_mailings = MailingModel.objects.filter(owner=user)
+        context["total_mailings"] = user_mailings.count()
+        context["total_recipients"] = sum(mailing.recipients.count() for mailing in user_mailings)
+
+
+        all_attempts = AttemptToSend.objects.filter(mailing__owner=user)
+        context["all_attempts"] = all_attempts.count()
+        context["success_attempts"] = all_attempts.filter(status="succes").count()
+        context["unsuccess_attemps"] = all_attempts.filter(status="unsucces").count()
 
         return context
