@@ -18,7 +18,7 @@
     <div class="container py-4">
         <!-- Общая статистика в карточках -->
         <div class="row g-4 mb-5">
-            <div class="col-md-3">
+            <div class="col-md-2">
                 <div class="card shadow-sm border-0 hover-card text-center h-100">
                     <div class="card-body p-4">
                         <div class="rounded-circle bg-primary bg-opacity-10 d-inline-flex p-3 mb-3">
@@ -30,7 +30,7 @@
                 </div>
             </div>
 
-            <div class="col-md-3">
+            <div class="col-md-2">
                 <div class="card shadow-sm border-0 hover-card text-center h-100">
                     <div class="card-body p-4">
                         <div class="rounded-circle bg-info bg-opacity-10 d-inline-flex p-3 mb-3">
@@ -38,6 +38,18 @@
                         </div>
                         <h2 class="display-5 fw-bold mb-0">{{ total_recipients }}</h2>
                         <p class="text-muted mb-0">Всего получателей</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-2">
+                <div class="card shadow-sm border-0 hover-card text-center h-100">
+                    <div class="card-body p-4">
+                        <div class="rounded-circle bg-secondary bg-opacity-10 d-inline-flex p-3 mb-3">
+                            <i class="bi bi-envelope-paper-fill text-secondary fs-1"></i>
+                        </div>
+                        <h2 class="display-5 fw-bold mb-0">{{ all_attempts }}</h2>
+                        <p class="text-muted mb-0">Всего попыток отправки</p>
                     </div>
                 </div>
             </div>
@@ -77,27 +89,27 @@
                             Общая эффективность
                         </h5>
                         {% if all_attempts > 0 %}
-                        <div class="progress mb-3" style="height: 30px; border-radius: 15px;">
-                            <div class="progress-bar bg-success" role="progressbar"
-                                 style="width: {% widthratio success_attempts all_attempts 100 %}%;
+                            <div class="progress mb-3" style="height: 30px; border-radius: 15px;">
+                                <div class="progress-bar bg-success" role="progressbar"
+                                     style="width: {% widthratio success_attempts all_attempts 100 %}%;
                                             border-radius: 15px 0 0 15px;">
-                                Успешно: {% widthratio success_attempts all_attempts 100 %}%
-                            </div>
-                            <div class="progress-bar bg-danger" role="progressbar"
-                                 style="width: {% widthratio unsuccess_attemps all_attempts 100 %}%;
+                                    Успешно: {% widthratio success_attempts all_attempts 100 %}%
+                                </div>
+                                <div class="progress-bar bg-danger" role="progressbar"
+                                     style="width: {% widthratio unsuccess_attemps all_attempts 100 %}%;
                                             border-radius: 0 15px 15px 0;">
-                                Ошибок: {% widthratio unsuccess_attemps all_attempts 100 %}%
+                                    Ошибок: {% widthratio unsuccess_attemps all_attempts 100 %}%
+                                </div>
                             </div>
-                        </div>
-                        <p class="text-muted text-center mb-0">
-                            Всего попыток: {{ all_attempts }} |
-                            Успех: {% widthratio success_attempts all_attempts 100 %}%
-                        </p>
+                            <p class="text-muted text-center mb-0">
+                                Всего попыток: {{ all_attempts }} |
+                                Успех: {% widthratio success_attempts all_attempts 100 %}%
+                            </p>
                         {% else %}
-                        <div class="alert alert-info text-center mb-0">
-                            <i class="bi bi-info-circle me-2"></i>
-                            Нет данных об отправках
-                        </div>
+                            <div class="alert alert-info text-center mb-0">
+                                <i class="bi bi-info-circle me-2"></i>
+                                Нет данных об отправках
+                            </div>
                         {% endif %}
                     </div>
                 </div>
@@ -116,75 +128,90 @@
                 <div class="table-responsive">
                     <table class="table table-hover mb-0">
                         <thead class="table-light">
-                        <tr>
-                            <th>ID</th>
-                            <th>Тема письма</th>
-                            <th>Статус</th>
-                            <th>Получателей</th>
-                            <th>Период</th>
-                            <th class="text-center">Статистика</th>
-                        </tr>
+                            <tr>
+                                <th>ID</th>
+                                <th>Тема письма</th>
+                                <th>Статус</th>
+                                <th>Получателей</th>
+                                <th>Период</th>
+                                <th class="text-center">Попытки</th>
+                                <th class="text-center">Успешно</th>
+                                <th class="text-center">Ошибок</th>
+                                <th class="text-center">Эффективность</th>
+                            </tr>
                         </thead>
                         <tbody>
-                        {% for mailing in user_mailings %}
-                        <tr>
-                            <td class="fw-bold">#{{ mailing.id }}</td>
-                            <td>{{ mailing.message.subject_line|default:"Без темы"|truncatechars:40 }}</td>
-                            <td>
-                                {% if mailing.status == 'created' %}
-                                <span class="badge bg-secondary">Создана</span>
-                                {% elif mailing.status == 'started' %}
-                                <span class="badge bg-success">Запущена</span>
-                                {% else %}
-                                <span class="badge bg-danger">Завершена</span>
-                                {% endif %}
-                            </td>
-                            <td>{{ mailing.recipients.count }}</td>
-                            <td>
-                                <small class="text-muted">
-                                    <td class="text-center" style="min-width: 180px;">
-                                        {% with attempts=mailing.attempttosend_set.all %}
-                                        {% with total=attempts|length %}
-                                        {% if total > 0 %}
-                                        {% with success=attempts|dictsort:"status"|length %}
+                            {% for mailing in user_mailings %}
+                            {% with attempts=mailing.attempttosend_set.all %}
+                            {% with total=attempts|length %}
+                            {% with success=attempts|dictsort:"status"|length %}
+                            <tr>
+                                <td class="fw-bold">#{{ mailing.id }}</td>
+                                <td>{{ mailing.message.subject_line|default:"Без темы"|truncatechars:40 }}</td>
+                                <td>
+                                    {% if mailing.status == 'created' %}
+                                        <span class="badge bg-secondary">Создана</span>
+                                    {% elif mailing.status == 'started' %}
+                                        <span class="badge bg-success">Запущена</span>
+                                    {% else %}
+                                        <span class="badge bg-danger">Завершена</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ mailing.recipients.count }}</td>
+                                <td>
+                                    <small class="text-muted">
+                                        {{ mailing.start_time|date:"d.m.Y" }}<br>
+                                        → {{ mailing.end_time|date:"d.m.Y" }}
+                                    </small>
+                                </td>
+                                <td class="text-center fw-bold">{{ total }}</td>
+                                <td class="text-center text-success fw-bold">{{ success }}</td>
+                                <td class="text-center text-danger fw-bold">{{ total|add:success|add:"-" }}</td>
+                                <td class="text-center" style="min-width: 120px;">
+                                    {% if total > 0 %}
                                         <div class="d-flex align-items-center gap-2">
                                             <div class="flex-grow-1">
                                                 <div class="progress" style="height: 8px;">
-                                                    <div class="progress-bar bg-success"
-                                                         style="width: {% widthratio success total 100 %}%"></div>
+                                                    <div class="progress-bar bg-success" style="width: {% widthratio success total 100 %}%"></div>
                                                 </div>
                                             </div>
-                                            <small>
-                                                <span class="text-success">{{ success }}</span>/
-                                                <span class="text-danger">{{ total|add:success|add:"-" }}</span>
-                                            </small>
+                                            <small class="fw-bold">{% widthratio success total 100 %}%</small>
                                         </div>
-                                        {% endwith %}
-                                        {% else %}
+                                    {% else %}
                                         <span class="text-muted">—</span>
-                                        {% endif %}
-                                        {% endwith %}
-                                        {% endwith %}
-                                    </td>
-                        </tr>
-                        {% empty %}
-                        <tr>
-                            <td colspan="6" class="text-center py-5">
-                                <i class="bi bi-inbox display-1 text-muted d-block mb-3"></i>
-                                <h5 class="text-muted">У вас пока нет рассылок</h5>
-                                <a href="{% url 'mailing:create_mailing' %}" class="btn btn-primary mt-2">
-                                    <i class="bi bi-plus-circle me-2"></i>Создать рассылку
-                                </a>
-                            </td>
-                        </tr>
-                        {% endfor %}
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endwith %}
+                            {% endwith %}
+                            {% endwith %}
+                            {% empty %}
+                            <tr>
+                                <td colspan="9" class="text-center py-5">
+                                    <i class="bi bi-inbox display-1 text-muted d-block mb-3"></i>
+                                    <h5 class="text-muted">У вас пока нет рассылок</h5>
+                                    <a href="{% url 'mailing:create_mailing' %}" class="btn btn-primary mt-2">
+                                        <i class="bi bi-plus-circle me-2"></i>Создать рассылку
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
                         </tbody>
                     </table>
                 </div>
             </div>
         </div>
 
-
+        <!-- Кнопки действий -->
+        <div class="text-center mt-4">
+            <a href="{% url 'mailing:list_mailing' %}" class="btn btn-outline-primary">
+                <i class="bi bi-arrow-left me-2"></i>К списку рассылок
+            </a>
+            <button onclick="window.print()" class="btn btn-outline-secondary ms-2">
+                <i class="bi bi-printer me-2"></i>Распечатать
+            </button>
+        </div>
+    </div>
 </main>
 
 <style>
@@ -192,12 +219,12 @@
         transition: transform 0.3s ease, box-shadow 0.3s ease;
         border-radius: 12px;
     }
-    
+
     .hover-card:hover {
         transform: translateY(-5px);
         box-shadow: 0 12px 28px rgba(0, 0, 0, 0.15) !important;
     }
-    
+
     .rounded-circle {
         width: 60px;
         height: 60px;
@@ -205,47 +232,51 @@
         align-items: center;
         justify-content: center;
     }
-    
+
     .progress {
         border-radius: 10px;
         overflow: hidden;
     }
-    
+
     .progress-bar {
         transition: width 0.6s ease;
         font-size: 0.8rem;
         line-height: 30px;
     }
-    
+
     .table th {
         font-weight: 600;
         border-top: none;
     }
-    
+
     .table td {
         vertical-align: middle;
     }
-    
+
     @media (max-width: 768px) {
         .display-5 {
-            font-size: 1.8rem;
+            font-size: 1.5rem;
         }
-        
+
         .rounded-circle {
-            width: 45px;
-            height: 45px;
+            width: 40px;
+            height: 40px;
         }
-        
+
         .rounded-circle i {
-            font-size: 1.3rem !important;
+            font-size: 1rem !important;
         }
-        
+
         .card-body {
             padding: 1rem !important;
         }
-        
+
         .table-responsive {
-            font-size: 0.85rem;
+            font-size: 0.8rem;
+        }
+
+        .col-md-2, .col-md-3 {
+            margin-bottom: 1rem;
         }
     }
     
