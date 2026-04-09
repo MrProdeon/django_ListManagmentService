@@ -4,8 +4,8 @@ from django.core.exceptions import ValidationError
 from django.db import models
 import datetime
 
-from django.db.models import CASCADE
-from users.models import CustomUser
+from django.db.models import CASCADE, SET_NULL
+from users.models import CustomUser, Recipient
 
 
 # Create your models here.
@@ -35,9 +35,10 @@ class MailingModel(models.Model):
     status = models.CharField(max_length=20, choices=STATUS_CHOICES,
                               default="created", verbose_name="Статус")
     message = models.ForeignKey(to=MessageModel, on_delete=CASCADE)
-    recipients = models.ManyToManyField(to=CustomUser)
+    recipients = models.ManyToManyField(to=Recipient)
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата создания")
     updated_at = models.DateTimeField(auto_now=True, verbose_name="Дата обновления")
+    owner = models.ForeignKey(to=CustomUser, on_delete=SET_NULL, verbose_name="Владелец рассылки", null=True)
 
     # def clean(self):
     #     super().clean()
