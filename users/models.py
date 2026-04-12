@@ -56,6 +56,10 @@ class CustomUser(AbstractUser):
     class Meta:
         verbose_name = "Пользователь"
         verbose_name_plural = "Пользователи"
+        permissions = [
+            ("can_view_all_recipients", "Может просматривать всех получателей"),
+            ("can_block_recipients", "Может блокировать получателей"),
+        ]
 
 
 class Recipient(models.Model):
@@ -70,6 +74,7 @@ class Recipient(models.Model):
     country = models.CharField(max_length=50, verbose_name="Страна")
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата создания")
     updated_at = models.DateTimeField(auto_now=True, verbose_name="Дата обновления")
+    owner = models.ForeignKey(to=CustomUser, on_delete=models.SET_NULL, verbose_name="Владелец рассылки", null=True)
 
 
     email = models.EmailField(unique=True, verbose_name="Электронная почта")

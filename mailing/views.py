@@ -1,6 +1,7 @@
 from itertools import count
 
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.core.exceptions import PermissionDenied
 from django.shortcuts import render
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, ListView, UpdateView, DetailView, DeleteView, TemplateView
@@ -13,70 +14,146 @@ from django.db.models import Count
 
 
 # Create your views here.
-class MessageCreateView(CreateView):
+class MessageCreateView(LoginRequiredMixin,CreateView):
     model = MessageModel
     template_name = "create_message.html"
     form_class = MessageCreateForm
     success_url = reverse_lazy("mailing:list_message")
     context_object_name = "message"
 
-class MessageUpdateView(UpdateView):
+    def form_valid(self, form):
+        form.instance.owner = self.request.user
+        return super().form_valid(form)
+
+class MessageUpdateView(LoginRequiredMixin, UpdateView):
     model = MessageModel
     template_name = "create_message.html"
     form_class = MessageCreateForm
     success_url = reverse_lazy("mailing:list_message")
     context_object_name = "message"
 
-class MessageListView(ListView):
+    def get_queryset(self):
+        user = self.request.user
+        return MessageModel.objects.filet(owner=user)
+
+class MessageListView(LoginRequiredMixin, ListView):
     model = MessageModel
     template_name = "list_message.html"
     context_object_name = "messages"
 
-class MessageDetailView(DetailView):
+    def get_queryset(self):
+        user = self.request.user
+        if user.has_perm("mailing.can_view_all_mesages") or user.is_superuser:
+            return MessageModel.objects.all()
+
+        return MessageModel.objects.filter(owner=user)
+
+class MessageDetailView(LoginRequiredMixin, DetailView):
     model = MessageModel
     template_name = "detail_message.html"
     context_object_name = "message"
 
-class MessageDeleteView(DeleteView):
+    def dispatch(self, request, *args, **kwargs):
+        obj = self.get_object()
+        if not (obj.owner == request.user or
+                request.user.has_perm("mailing.can_view_all_messages") or
+                request.user.is_superuser):
+            raise PermissionDenied("Вы не можете детально просматривать сообщения")
+        return super().dispatch(request, *args, **kwargs)
+
+class MessageDeleteView(LoginRequiredMixin, DeleteView):
     model = MessageModel
     template_name = "delete_message.html"
     success_url = reverse_lazy("mailing:list_message")
     context_object_name = "message"
 
-class MailingCreateView(CreateView):
+    def dispatch(self, request, *args, **kwargs):
+        obj = self.get_object()
+
+        if not (obj.user.owner == request.user or
+                request.user.has_perm("mailing.can_disable_message") or
+                request.user.is_superuser):
+            raise PermissionDenied("Вы не можете удалить сообщение")
+
+class MailingCreateView(LoginRequiredMixin, CreateView):
     model = MailingModel
     template_name = "create_mailing.html"
     form_class = MailingCreateForm
     success_url = reverse_lazy("mailing:list_mailing")
     context_object_name = "mailing"
 
-class MailingUpdateView(UpdateView):
+    def form_valid(self, form):
+        form.instance.owner = self.request.user
+        return super().form_valid(form)
+
+class MailingUpdateView(LoginRequiredMixin, UpdateView):
     model = MailingModel
     template_name = "create_mailing.html"
     form_class = MailingCreateForm
     context_object_name = "mailing"
     success_url = reverse_lazy("mailing:list_mailing")
 
-class MailingDetailView(DetailView):
+    def get_queryset(self):
+        user = self.request.user
+        return MailingModel.objects.filter(owner=user)
+
+class MailingDetailView(LoginRequiredMixin, DetailView):
     model = MailingModel
     template_name = "detail_mailing.html"
     context_object_name = "mailing"
+
+    def dispatch(self, request, *args, **kwargs):
+        obj = self.get_object()
+        if not (obj.owner == request.user or
+                request.user.has_perm("mailing.can_view_all_mailings") or
+                request.user.is_superuser):
+            raise PermissionDenied("Вы не можете детально просматривать рассылку")
+        return super().dispatch(request, *args, **kwargs)
 
     def get_object(self, queryset=None):
         obj = super().get_object(queryset=None)
         obj.update_status()
         return obj
 
-class MailingListView(ListView):
+class MailingListView(LoginRequiredMixin, ListView):
     model = MailingModel
     context_object_name = "mailings"
     template_name = "list_mailing.html"
 
-class MailingDeleteView(DeleteView):
+    def get_queryset(self):
+        user = self.request.user
+        if user.has_perm("mailing.can_view_all_mailings") or user.is_superuser:
+            return MailingModel.objects.all()
+
+        return MailingModel.objects.filter(owner=user)
+
+class MailingDeleteView(LoginRequiredMixin, DeleteView):
     model = MailingModel
     template_name = "delete_mailing.html"
     success_url = reverse_lazy("mailing:list_mailing")
     context_object_name = "mailing"
+
+    def dispatch(self, request, *args, **kwargs):
+        obj = self.get_object()
+        if not (obj.owner == request.user or
+                request.user.is_superuser):
+            raise PermissionDenied("Вы не можете удалять рассылку")
+        return super().dispatch(request, *args, **kwargs)
+
+class MailingDisableView(LoginRequiredMixin, UpdateView):
+    model = MailingModel
+    fields = ["status"]
+    template_name = "disable_mailing.html"
+    context_object_name = "mailing"
+
+    def dispatch(self, request, *args, **kwargs):
+        if not (request.user.has_perm('mailing.can_disable_mailing') or request.user.is_superuser):
+            raise PermissionDenied("Вы не можете отключать рассылку")
+        return super().dispatch(request, *args, **kwargs)
+
+    def form_valid(self, form):
+        form.instance.status = "disabled"
+        return super().form_valid(form)
 
 class MailingMainView(TemplateView):
     template_name = "main_mailing.html"

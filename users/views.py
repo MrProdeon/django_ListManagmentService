@@ -1,3 +1,4 @@
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse_lazy
@@ -9,33 +10,64 @@ from users.services import send_verification_email
 from django.contrib import messages
 
 # RECIPIENTS
-class CreateRecipient(CreateView):
+class CreateRecipient(LoginRequiredMixin, CreateView):
     model = Recipient
     form_class = RecipientForm
     template_name = "create_or_update_recipient.html"
     success_url = reverse_lazy("users:list_recipient")
 
-class UpdateRecipient(UpdateView):
+    def form_valid(self, form):
+        form.instance.owner = self.request.user
+        return super().form_valid(form)
+
+class UpdateRecipient(LoginRequiredMixin, UpdateView):
     model = Recipient
     form_class = RecipientForm
     template_name = 'create_or_update_recipient.html'
     success_url = reverse_lazy('users:list_recipient')
 
-class ListRecipient(ListView):
+    def get_queryset(self):
+        user = self.request.user
+
+        return Recipient.objects.filter(owner=user)
+
+class ListRecipient(LoginRequiredMixin, ListView):
     model = Recipient
     template_name = "list_recipient.html"
     context_object_name = "users"
 
-class DeleteRecipient(DeleteView):
+    def get_queryset(self):
+        user = self.request.user
+        if user.has_perm("users.can_view_all_recipients") or user.is_superuser:
+            return Recipient.objects.all()
+        return Recipient.objects.filter(owner=user)
+
+class DeleteRecipient(LoginRequiredMixin, DeleteView):
     model = Recipient
     template_name = "confirm_delete.html"
     success_url = reverse_lazy("users:list_recipient")
     context_object_name = "user"
 
-class DetailRecipient(DetailView):
+    def dispatch(self, request, *args, **kwargs):
+        obj = self.get_object()
+        if not (obj.owner == request.user or
+                request.user.is_superuser or
+                request.user.has_perm("users.can_block_recipients")):
+            raise PermissionDenied("Вы не можете удалять пользователя")
+        return super().dispatch(request, *args, **kwargs)
+
+class DetailRecipient(LoginRequiredMixin, DetailView):
     model = Recipient
     template_name = "detail_recipient.html"
     context_object_name = "user"
+
+    def dispatch(self, request, *args, **kwargs):
+        obj = self.get_object()
+        if not (obj.owner == request.user or
+                request.user.has_perm("users.can_view_all_recipients") or
+                request.user.is_superuser):
+            raise PermissionDenied("Вы не можете детально просматривать получателей")
+        return super().dispatch(request, *args, **kwargs)
 
 # USERS
 
