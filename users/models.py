@@ -57,8 +57,7 @@ class CustomUser(AbstractUser):
         verbose_name = "Пользователь"
         verbose_name_plural = "Пользователи"
         permissions = [
-            ("can_view_all_recipients", "Может просматривать всех получателей"),
-            ("can_block_recipients", "Может блокировать получателей"),
+            ("can_block_users", "Может блокировать пользователей")
         ]
 
 
@@ -89,7 +88,8 @@ class Recipient(models.Model):
 
     class Meta:
         permissions = [
-            ("can_block_users", "Может блокировать пользователей")
+            ("can_view_all_recipients", "Может просматривать всех получателей"),
+            ("can_block_recipients", "Может блокировать получателей"),
         ]
         verbose_name = "Получатель рассылки"
         verbose_name_plural = "Получатели рассылки"
