@@ -29,7 +29,7 @@ urlpatterns = [
     path("login/", CustomLoginView.as_view(), name="login"),
     path("logout/", auth_views.LogoutView.as_view(), name="logout"),
     path("list_users/", ListUsers.as_view(), name="list_users"),
-    path("block_user/<int:user_id>", BlockUser.as_view(), name="block_user"),
+    path("block_user/<int:pk>", BlockUser.as_view(), name="block_user"),
 
     path('reset_password/', auth_views.PasswordResetView.as_view(success_url=reverse_lazy('users:password_reset_done')),
          name='reset_password'),

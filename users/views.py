@@ -130,11 +130,21 @@ class ResendVerificationView(View):
         messages.success(request, 'Новое письмо с подтверждением отправлено!')
         return redirect('users:login')
 
-class BlockUser(LoginRequiredMixin, TemplateView):
+class BlockUser(LoginRequiredMixin, UpdateView):
+    model = CustomUser
+    fields = ["is_active"]
     template_name = "block_user.html"
+    success_url = reverse_lazy('users:list_users')
+    context_object_name = "user"
 
     def dispatch(self, request, *args, **kwargs):
         if not (request.user.has_perm("users.can_block_users") or
                 request.user.is_superuser):
             raise PermissionDenied("Вы не можете блокировать пользователей")
         return super().dispatch(request, *args, **kwargs)
+
+    def form_valid(self, form):
+        user = form.save(commit=False)
+        user.is_active = not user.is_active
+        user.save()
+        return super().form_valid(form)
