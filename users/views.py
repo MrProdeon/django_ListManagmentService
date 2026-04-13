@@ -3,7 +3,7 @@ from django.contrib.auth.views import LoginView
 from django.core.exceptions import PermissionDenied
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse_lazy
-from django.views.generic import CreateView, ListView, DeleteView, DetailView, UpdateView
+from django.views.generic import CreateView, ListView, DeleteView, DetailView, UpdateView, TemplateView
 from prompt_toolkit.validation import ValidationError
 
 from users.models import CustomUser, EmailVerifiedToken, Recipient
@@ -130,5 +130,11 @@ class ResendVerificationView(View):
         messages.success(request, 'Новое письмо с подтверждением отправлено!')
         return redirect('users:login')
 
-class BlockUser:
-    pass
+class BlockUser(LoginRequiredMixin, TemplateView):
+    template_name = "block_user.html"
+
+    def dispatch(self, request, *args, **kwargs):
+        if not (request.user.has_perm("users.can_block_users") or
+                request.user.is_superuser):
+            raise PermissionDenied("Вы не можете блокировать пользователей")
+        return super().dispatch(request, *args, **kwargs)

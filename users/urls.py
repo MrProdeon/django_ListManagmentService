@@ -5,7 +5,8 @@ from django.views.generic import TemplateView
 
 
 from users.views import (CreateRecipient, ListRecipient, DeleteRecipient, DetailRecipient, UpdateRecipient,
-                         RegisterView, CustomLoginView, VerifyEmailView, ResendVerificationView, ListUsers)
+                         RegisterView, CustomLoginView, VerifyEmailView, ResendVerificationView, ListUsers,
+                         BlockUser)
 
 app_name = "users"
 

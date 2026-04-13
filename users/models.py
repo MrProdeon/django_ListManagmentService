@@ -88,6 +88,9 @@ class Recipient(models.Model):
         return self.email
 
     class Meta:
+        permissions = [
+            ("can_block_users", "Может блокировать пользователей")
+        ]
         verbose_name = "Получатель рассылки"
         verbose_name_plural = "Получатели рассылки"
 
