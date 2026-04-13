@@ -1,8 +1,11 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView
+from django.core.exceptions import PermissionDenied
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, ListView, DeleteView, DetailView, UpdateView
+from prompt_toolkit.validation import ValidationError
+
 from users.models import CustomUser, EmailVerifiedToken, Recipient
 from users.forms import RecipientForm, CustomUserCreationForm, CustomAuthenticationForm
 from django.views import View
@@ -41,6 +44,17 @@ class ListRecipient(LoginRequiredMixin, ListView):
         if user.has_perm("users.can_view_all_recipients") or user.is_superuser:
             return Recipient.objects.all()
         return Recipient.objects.filter(owner=user)
+
+class ListUsers(LoginRequiredMixin, ListView):
+    model = CustomUser
+    template_name = "list_users.html"
+    context_object_name = "users"
+
+    def get_queryset(self):
+        user = self.request.user
+        if user.has_perm("users.can_view_all_recipients") or user.is_superuser:
+            return CustomUser.objects.all()
+        raise PermissionDenied("Вы не можете просматривать пользователей")
 
 class DeleteRecipient(LoginRequiredMixin, DeleteView):
     model = Recipient
@@ -115,3 +129,6 @@ class ResendVerificationView(View):
 
         messages.success(request, 'Новое письмо с подтверждением отправлено!')
         return redirect('users:login')
+
+class BlockUser:
+    pass

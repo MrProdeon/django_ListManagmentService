@@ -73,11 +73,16 @@
             <div class="d-flex align-items-center ms-auto">
 
                 <div class="me-2">
+                    {% if not user.is_authenticated %}
                     <a href="{% url 'users:login' %}" class="btn btn-outline-light btn-sm">Войти</a>
+                    <a href="{% url 'users:register' %}" class="btn btn-outline-light btn-sm">Регистрация</a>
+                    {% endif %}
+                    {% if user.is_authenticated %}
                     <form method="post" action="{% url 'users:logout' %}" style="display: inline;">
                         {% csrf_token %}
                         <button type="submit" class="btn btn-outline-light btn-sm">Выйти</button>
                     </form>
+                    {% endif %}
                 </div>
 
 
@@ -110,6 +115,9 @@
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'mailing:report' %}">Отчёт</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'users:list_users' %}">Список пользователей</a>
                     </li>
                 </ul>
             </div>

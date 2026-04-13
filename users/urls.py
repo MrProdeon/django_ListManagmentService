@@ -5,7 +5,7 @@ from django.views.generic import TemplateView
 
 
 from users.views import (CreateRecipient, ListRecipient, DeleteRecipient, DetailRecipient, UpdateRecipient,
-                         RegisterView, CustomLoginView, VerifyEmailView, ResendVerificationView)
+                         RegisterView, CustomLoginView, VerifyEmailView, ResendVerificationView, ListUsers)
 
 app_name = "users"
 
@@ -27,6 +27,8 @@ urlpatterns = [
     path("resend/<int:user_id>", ResendVerificationView.as_view(), name="resend_verification"),
     path("login/", CustomLoginView.as_view(), name="login"),
     path("logout/", auth_views.LogoutView.as_view(), name="logout"),
+    path("list_users/", ListUsers.as_view(), name="list_users"),
+    path("block_user/<int:user_id>", BlockUser.as_view(), name="block_user"),
 
     path('reset_password/', auth_views.PasswordResetView.as_view(success_url=reverse_lazy('users:password_reset_done')),
          name='reset_password'),
