@@ -11,6 +11,9 @@ from users.forms import RecipientForm, CustomUserCreationForm, CustomAuthenticat
 from django.views import View
 from users.services import send_verification_email
 from django.contrib import messages
+from django.views.decorators.cache import cache_page
+from django.utils.decorators import method_decorator
+from django.core.cache import cache
 
 # RECIPIENTS
 class CreateRecipient(LoginRequiredMixin, CreateView):
@@ -21,13 +24,20 @@ class CreateRecipient(LoginRequiredMixin, CreateView):
 
     def form_valid(self, form):
         form.instance.owner = self.request.user
-        return super().form_valid(form)
+        response = super().form_valid(form)
+        cache.delete(f"recipient_list_{self.request.user.id}")
+        return response
 
 class UpdateRecipient(LoginRequiredMixin, UpdateView):
     model = Recipient
     form_class = RecipientForm
     template_name = 'create_or_update_recipient.html'
     success_url = reverse_lazy('users:list_recipient')
+
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        cache.delete(f"recipient_list_{self.request.user.id}")
+        return response
 
     def get_queryset(self):
         user = self.request.user
@@ -41,10 +51,22 @@ class ListRecipient(LoginRequiredMixin, ListView):
 
     def get_queryset(self):
         user = self.request.user
-        if user.has_perm("users.can_view_all_recipients") or user.is_superuser:
-            return Recipient.objects.all()
-        return Recipient.objects.filter(owner=user)
+        cache_key = f"recipient_list_{user.id}"
 
+        queryset = cache.get(cache_key)
+
+        if queryset is None:
+            if user.has_perm("users.can_view_all_recipients") or user.is_superuser:
+                queryset = Recipient.objects.all()
+            else:
+                queryset = Recipient.objects.filter(owner=user)
+
+            cache.set(cache_key, queryset, 300)
+        return queryset
+
+
+
+@method_decorator(cache_page(60 * 5), name="dispatch")
 class ListUsers(LoginRequiredMixin, ListView):
     model = CustomUser
     template_name = "list_users.html"
@@ -118,6 +140,18 @@ class VerifyEmailView(View):
         else:
             messages.error(request, 'Ссылка подтверждения истекла. Запросите новую.')
             return redirect('users:resend_verification', user_id=token_obj.user.id)
+
+class CreateUser(LoginRequiredMixin, CreateView):
+    model = CustomUser
+    form_class = CustomUserCreationForm
+    template_name = "create_or_update_user.html"
+    success_url = reverse_lazy("users:list_users")
+
+    def form_valid(self, form):
+        form.instance.owner = self.request.user
+        response = super().form_valid(form)
+        cache.delete(f"recipient_list_{self.request.user.id}")
+        return response
 
 class ResendVerificationView(View):
     def get(self,request, user_id):

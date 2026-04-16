@@ -11,10 +11,13 @@ from django.views import View
 from django.utils import timezone
 from users.models import CustomUser
 from django.db.models import Count
+from django.views.decorators.cache import cache_page
+from django.utils.decorators import method_decorator
+from django.core.cache import cache
 
 
 # Create your views here.
-class MessageCreateView(LoginRequiredMixin,CreateView):
+class MessageCreateView(LoginRequiredMixin, CreateView):
     model = MessageModel
     template_name = "create_message.html"
     form_class = MessageCreateForm
@@ -24,6 +27,7 @@ class MessageCreateView(LoginRequiredMixin,CreateView):
     def form_valid(self, form):
         form.instance.owner = self.request.user
         return super().form_valid(form)
+
 
 class MessageUpdateView(LoginRequiredMixin, UpdateView):
     model = MessageModel
@@ -43,10 +47,23 @@ class MessageListView(LoginRequiredMixin, ListView):
 
     def get_queryset(self):
         user = self.request.user
-        if user.has_perm("mailing.can_view_all_mesages") or user.is_superuser:
-            return MessageModel.objects.all()
 
-        return MessageModel.objects.filter(owner=user)
+        if user.has_perm("mailing.can_view_all_messages") or user.is_superuser:
+            cache_key = "cache_messages_all"
+        else:
+            cache_key = f"cache_messages_{user.id}"
+
+        queryset = cache.get("cache_messages")
+
+        if queryset is None:
+            if user.has_perm("mailing.can_view_all_messages") or user.is_superuser:
+                queryset = MessageModel.objects.all()
+            else:
+                queryset = MessageModel.objects.filter(owner=user)
+            cache.set(cache_key, queryset, 300)
+
+        return queryset
+
 
 class MessageDetailView(LoginRequiredMixin, DetailView):
     model = MessageModel
@@ -61,6 +78,7 @@ class MessageDetailView(LoginRequiredMixin, DetailView):
             raise PermissionDenied("Вы не можете детально просматривать сообщения")
         return super().dispatch(request, *args, **kwargs)
 
+
 class MessageDeleteView(LoginRequiredMixin, DeleteView):
     model = MessageModel
     template_name = "delete_message.html"
@@ -74,6 +92,8 @@ class MessageDeleteView(LoginRequiredMixin, DeleteView):
                 request.user.has_perm("mailing.can_disable_message") or
                 request.user.is_superuser):
             raise PermissionDenied("Вы не можете удалить сообщение")
+        return super().dispatch(request, *args, **kwargs)
+
 
 class MailingCreateView(LoginRequiredMixin, CreateView):
     model = MailingModel
@@ -84,7 +104,11 @@ class MailingCreateView(LoginRequiredMixin, CreateView):
 
     def form_valid(self, form):
         form.instance.owner = self.request.user
+        response = super().form_valid(form)
+        cache.delete(f"cache_messages_{self.request.user.id}")
+        cache.delete("cache_messages_all")
         return super().form_valid(form)
+
 
 class MailingUpdateView(LoginRequiredMixin, UpdateView):
     model = MailingModel
@@ -95,7 +119,18 @@ class MailingUpdateView(LoginRequiredMixin, UpdateView):
 
     def get_queryset(self):
         user = self.request.user
+        cache.delete("cache_messages")
         return MailingModel.objects.filter(owner=user)
+
+    def form_valid(self, form):
+        response = super().form_valid(form)
+
+
+        cache.delete(f"cache_messages_{self.request.user.id}")
+        cache.delete("cache_messages_all")
+
+        return response
+
 
 class MailingDetailView(LoginRequiredMixin, DetailView):
     model = MailingModel
@@ -115,6 +150,7 @@ class MailingDetailView(LoginRequiredMixin, DetailView):
         obj.update_status()
         return obj
 
+
 class MailingListView(LoginRequiredMixin, ListView):
     model = MailingModel
     context_object_name = "mailings"
@@ -123,9 +159,15 @@ class MailingListView(LoginRequiredMixin, ListView):
     def get_queryset(self):
         user = self.request.user
         if user.has_perm("mailing.can_view_all_mailings") or user.is_superuser:
-            return MailingModel.objects.all()
+            queryset =  MailingModel.objects.all()
+        else:
+            MailingModel.objects.filter(owner=user)
 
-        return MailingModel.objects.filter(owner=user)
+        for mailing in queryset:
+            mailing.update_status()
+
+        return queryset
+
 
 class MailingDeleteView(LoginRequiredMixin, DeleteView):
     model = MailingModel
@@ -140,11 +182,13 @@ class MailingDeleteView(LoginRequiredMixin, DeleteView):
             raise PermissionDenied("Вы не можете удалять рассылку")
         return super().dispatch(request, *args, **kwargs)
 
+
 class MailingDisableView(LoginRequiredMixin, UpdateView):
     model = MailingModel
     fields = ["status"]
     template_name = "disable_mailing.html"
     context_object_name = "mailing"
+    success_url = reverse_lazy("mailing:list_mailing")
 
     def dispatch(self, request, *args, **kwargs):
         if not (request.user.has_perm('mailing.can_disable_mailing') or request.user.is_superuser):
@@ -155,25 +199,46 @@ class MailingDisableView(LoginRequiredMixin, UpdateView):
         form.instance.status = "disabled"
         return super().form_valid(form)
 
-class MailingMainView(TemplateView):
+
+class MailingMainView(LoginRequiredMixin, TemplateView):
     template_name = "main_mailing.html"
 
     def get_context_data(self, **kwargs):
         now = timezone.now()
         context = super().get_context_data(**kwargs)
 
-        mailing_counter = MailingModel.objects.count()
-        active_mailing_count = MailingModel.objects.filter(
-            start_time__lte=now,
-            end_time__gte=now,
-            status="started"
-        ).count()
-        user_count = CustomUser.objects.count()
-        context["mailing_counter"] = mailing_counter
-        context["active_mailing_count"] = active_mailing_count
-        context["user_count"] = user_count
+        cache_key = "main_page_stats"
+        stats = cache.get(cache_key)
 
+        if not stats:
+            now = timezone.now()
+            stats = {
+                "mailing_counter": MailingModel.objects.count(),
+                "active_mailing_count": MailingModel.objects.filter(
+                    start_time__lte=now,
+                    end_time__gte=now,
+                    status="started"
+                ).count(),
+                "user_count" : CustomUser.objects.count(),
+            }
+
+            cache.set(cache_key, stats, 30)
+
+        context.update(stats)
         return context
+
+        # mailing_counter = MailingModel.objects.count()
+        # active_mailing_count = MailingModel.objects.filter(
+        #     start_time__lte=now,
+        #     end_time__gte=now,
+        #     status="started"
+        # ).count()
+        # user_count = CustomUser.objects.count()
+        # context["mailing_counter"] = mailing_counter
+        # context["active_mailing_count"] = active_mailing_count
+        # context["user_count"] = user_count
+
+
 
 class ReportView(LoginRequiredMixin, TemplateView):
     template_name = "report.html"
@@ -183,10 +248,13 @@ class ReportView(LoginRequiredMixin, TemplateView):
 
         context = super().get_context_data(**kwargs)
 
-        user_mailings = MailingModel.objects.filter(owner=user)
+        if self.request.user.has_perm("mailing.can_view_all_mailings") or self.request.user.is_superuser:
+            user_mailings = MailingModel.objects.all()
+        else:
+            user_mailings = MailingModel.objects.filter(owner=user)
+        context["user_mailings"] = user_mailings
         context["total_mailings"] = user_mailings.count()
         context["total_recipients"] = sum(mailing.recipients.count() for mailing in user_mailings)
-
 
         all_attempts = AttemptToSend.objects.filter(mailing__owner=user)
         context["all_attempts"] = all_attempts.count()
