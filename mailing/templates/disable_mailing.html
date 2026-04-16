@@ -12,9 +12,12 @@
                     <p>Вы уверены, что хотите отключить рассылку?</p>
                     <p><strong>{{ mailing.message.subject_line|default:"Без темы" }}</strong></p>
                     <p>Текущий статус: {{ mailing.get_status_display }}</p>
-                    
+
                     <form method="post">
                         {% csrf_token %}
+                        <div style="display: none;">
+                            {{ form.as_p }}
+                        </div>
                         <button type="submit" class="btn btn-danger">Отключить</button>
                         <a href="{% url 'mailing:list_mailing' %}" class="btn btn-secondary">Отмена</a>
                     </form>
