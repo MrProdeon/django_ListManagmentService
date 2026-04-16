@@ -147,11 +147,11 @@ class CreateUser(LoginRequiredMixin, CreateView):
     template_name = "create_or_update_user.html"
     success_url = reverse_lazy("users:list_users")
 
-    def form_valid(self, form):
-        form.instance.owner = self.request.user
-        response = super().form_valid(form)
-        cache.delete(f"recipient_list_{self.request.user.id}")
-        return response
+class UpdateUser(LoginRequiredMixin, UpdateView):
+    model = CustomUser
+    form_class = CustomUserCreationForm
+    template_name = 'create_or_update_user.html'
+    success_url = reverse_lazy('users:list_user')
 
 class ResendVerificationView(View):
     def get(self,request, user_id):
