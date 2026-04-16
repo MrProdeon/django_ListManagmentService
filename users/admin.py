@@ -22,6 +22,7 @@ class RecipientAdmin(admin.ModelAdmin):
 @admin.register(CustomUser)
 class CustomUserAdmin(admin.ModelAdmin):
     list_display = (
+    "id",
     "full_name",
     "phone_number",
     "comment",
