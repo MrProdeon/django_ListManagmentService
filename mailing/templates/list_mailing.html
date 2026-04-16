@@ -12,9 +12,11 @@
                     Всего рассылок: <span class="badge bg-primary rounded-pill fs-6">{{ mailings|length }}</span>
                 </p>
                 <p>
+                    {% if not perms.mailing.can_view_all_mailings or user.is_superuser %}
                     <a href="{% url 'mailing:create_mailing' %}" class="btn btn-primary btn-lg px-5 my-2">
                         <i class="bi bi-plus-circle-fill me-2"></i>Создать рассылку
                     </a>
+                    {% endif %}
                 </p>
             </div>
         </div>
@@ -24,6 +26,7 @@
         <div class="container">
             <div class="row row-cols-1 row-cols-sm-2 row-cols-md-2 g-4">
                 {% for mailing in mailings %}
+                {% if mailing.owner == user or perms.mailing.can_view_all_mailings or user.is_superuser %}
                 <div class="col">
                     <div class="card shadow-sm h-100 border-0 hover-card">
                         <div class="card-header bg-white border-0 pt-4 px-4">
@@ -70,6 +73,7 @@
                             
                             <div class="d-flex justify-content-between align-items-center mt-4 pt-2">
                                 <div class="btn-group w-100 gap-2">
+                                    {% if mailing.owner == user or user.is_superuser %}
                                     <a href="{% url 'mailing:detail_mailing' mailing.pk %}" class="btn btn-sm btn-outline-primary">
                                         <i class="bi bi-eye me-1"></i>Просмотр
                                     </a>
@@ -79,6 +83,12 @@
                                     <a href="{% url 'mailing:delete_mailing' mailing.pk %}" class="btn btn-sm btn-outline-danger">
                                         <i class="bi bi-trash me-1"></i>Удалить
                                     </a>
+                                    {% endif %}
+                                    {% if perms.mailing.can_disable_message or user.is_superuser %}
+                                    <a href="{% url 'mailing:disable_mailing' mailing.pk %}" class="btn btn-sm btn-outline-danger">
+                                        <i class="bi bi-trash me-1"></i>Отключить
+                                    </a>
+                                    {% endif %}
                                 </div>
                             </div>
                         </div>
@@ -91,6 +101,7 @@
                         </div>
                     </div>
                 </div>
+                {% endif %}
                 {% empty %}
                 <div class="col-12">
                     <div class="alert alert-info text-center py-5">

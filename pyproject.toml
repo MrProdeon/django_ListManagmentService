@@ -12,6 +12,7 @@ python-dotenv = "^1.2.2"
 psycopg2 = "^2.9.11"
 pillow = "^12.1.1"
 ipython = "^9.12.0"
+redis = "^7.4.0"
 
 
 [tool.poetry.group.linters.dependencies]

@@ -15,6 +15,7 @@ class MessageModel(models.Model):
     message_text = models.TextField(verbose_name="Текст сообщения")
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата создания")
     updated_at = models.DateTimeField(auto_now=True, verbose_name="Дата обновления")
+    owner = models.ForeignKey(to=CustomUser, on_delete=models.SET_NULL, null=True, verbose_name="Владелец")
 
     class Meta:
         verbose_name = "Сообщение"
@@ -23,11 +24,20 @@ class MessageModel(models.Model):
     def __str__(self):
         return self.subject_line
 
+
+    class Meta:
+        verbose_name = "Сообщение"
+        verbose_name_plural = "Сообщения"
+        permissions = [
+            ("can_view_all_messages", "Может просматривать все сообщения"),
+            ("can_disable_message", "Может отключать сообщения"),
+        ]
 class MailingModel(models.Model):
     STATUS_CHOICES = [
         ('created', 'Создана'),
         ('started', 'Запущена'),
         ('completed', 'Завершена'),
+        ('disabled', "Отключена")
     ]
 
     start_time = models.DateTimeField(verbose_name="Дата и время запуска рассылки")
@@ -58,12 +68,16 @@ class MailingModel(models.Model):
     def update_status(self):
         now = timezone.now()
 
-        if now < self.start_time:
-            new_status = "created"
-        elif now > self.end_time:
-            new_status = "completed"
-        elif self.start_time <= now <= self.end_time:
-            new_status = "started"
+        if self.status == "disabled":
+            new_status = "disabled"
+        else:
+
+            if now < self.start_time:
+                new_status = "created"
+            elif now > self.end_time:
+                new_status = "completed"
+            elif self.start_time <= now <= self.end_time:
+                new_status = "started"
 
         if new_status != self.status:
             self.status = new_status
@@ -77,6 +91,10 @@ class MailingModel(models.Model):
     class Meta:
         verbose_name = "Рассылка"
         verbose_name_plural = "Рассылки"
+        permissions = [
+            ("can_view_all_mailings", "Может просматривать все рассылки"),
+            ("can_disable_mailing", "Может отключать рассылки")
+        ]
 
 class AttemptToSend(models.Model):
     STATUS_CHOICES = [

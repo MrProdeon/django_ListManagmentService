@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-danger text-white">
+                    <h4>Отключение рассылки</h4>
+                </div>
+                <div class="card-body">
+                    <p>Вы уверены, что хотите отключить рассылку?</p>
+                    <p><strong>{{ mailing.message.subject_line|default:"Без темы" }}</strong></p>
+                    <p>Текущий статус: {{ mailing.get_status_display }}</p>
+
+                    <form method="post">
+                        {% csrf_token %}
+                        <div style="display: none;">
+                            {{ form.as_p }}
+                        </div>
+                        <button type="submit" class="btn btn-danger">Отключить</button>
+                        <a href="{% url 'mailing:list_mailing' %}" class="btn btn-secondary">Отмена</a>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
