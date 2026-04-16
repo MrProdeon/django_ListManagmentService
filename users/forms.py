@@ -1,6 +1,6 @@
 from django.forms import ModelForm
 from users.models import CustomUser, Recipient
-from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
+from django.contrib.auth.forms import UserCreationForm, AuthenticationForm, UserChangeForm
 from django import forms
 
 #RECIPIENTS
@@ -21,6 +21,12 @@ class CustomUserCreationForm(UserCreationForm):
         if commit:
             user.save()
         return user
+
+class CustomUserUpdatingForm(UserChangeForm):
+    password = None
+    class Meta(UserCreationForm.Meta):
+        model = CustomUser
+        fields = ("email", "full_name", "phone_number", "avatar", "country")
 
 class CustomAuthenticationForm(AuthenticationForm):
     username = forms.EmailField(

@@ -7,7 +7,7 @@ from django.views.generic import CreateView, ListView, DeleteView, DetailView, U
 from prompt_toolkit.validation import ValidationError
 
 from users.models import CustomUser, EmailVerifiedToken, Recipient
-from users.forms import RecipientForm, CustomUserCreationForm, CustomAuthenticationForm
+from users.forms import RecipientForm, CustomUserCreationForm, CustomAuthenticationForm, CustomUserUpdatingForm
 from django.views import View
 from users.services import send_verification_email
 from django.contrib import messages
@@ -149,9 +149,34 @@ class CreateUser(LoginRequiredMixin, CreateView):
 
 class UpdateUser(LoginRequiredMixin, UpdateView):
     model = CustomUser
-    form_class = CustomUserCreationForm
+    form_class = CustomUserUpdatingForm
     template_name = 'create_or_update_user.html'
-    success_url = reverse_lazy('users:list_user')
+    success_url = reverse_lazy('users:list_users')
+
+class DetailUser(LoginRequiredMixin, DetailView):
+    model = CustomUser
+    template_name = "detail_user.html"
+    context_object_name = "user"
+
+    def dispatch(self, request, *args, **kwargs):
+        obj = self.get_object()
+        if not (request.user.has_perm("users.can_view_all_recipients") or
+                request.user.is_superuser):
+            raise PermissionDenied("Вы не можете детально просматривать пользователей")
+        return super().dispatch(request, *args, **kwargs)
+
+class DeleteUser(LoginRequiredMixin, DeleteView):
+    model = CustomUser
+    template_name = "delete_user.html"
+    success_url = reverse_lazy("users:list_users")
+    context_object_name = "user"
+
+    def dispatch(self, request, *args, **kwargs):
+        obj = self.get_object()
+        if not (request.user.is_superuser or
+                request.user.has_perm("users.can_block_recipients")):
+            raise PermissionDenied("Вы не можете удалять пользователя")
+        return super().dispatch(request, *args, **kwargs)
 
 class ResendVerificationView(View):
     def get(self,request, user_id):
