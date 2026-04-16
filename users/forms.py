@@ -1,15 +1,21 @@
 from django.forms import ModelForm
 from users.models import CustomUser, Recipient
-from django.contrib.auth.forms import UserCreationForm, AuthenticationForm, UserChangeForm
+from django.contrib.auth.forms import (
+    UserCreationForm,
+    AuthenticationForm,
+    UserChangeForm,
+)
 from django import forms
 
-#RECIPIENTS
+
+# RECIPIENTS
 class RecipientForm(ModelForm):
     class Meta:
         model = Recipient
         fields = ["full_name", "phone_number", "country", "email", "avatar"]
 
-#USERS
+
+# USERS
 class CustomUserCreationForm(UserCreationForm):
     class Meta(UserCreationForm.Meta):
         model = CustomUser
@@ -22,31 +28,32 @@ class CustomUserCreationForm(UserCreationForm):
             user.save()
         return user
 
+
 class CustomUserUpdatingForm(UserChangeForm):
     password = None
+
     class Meta(UserCreationForm.Meta):
         model = CustomUser
         fields = ("email", "full_name", "phone_number", "avatar", "country")
 
+
 class CustomAuthenticationForm(AuthenticationForm):
     username = forms.EmailField(
-        widget=forms.EmailInput(attrs={
-            'class': 'form-control',
-            'placeholder': 'Email'
-        }),
-        label='Email'
+        widget=forms.EmailInput(
+            attrs={"class": "form-control", "placeholder": "Email"}
+        ),
+        label="Email",
     )
     password = forms.CharField(
-        widget=forms.PasswordInput(attrs={
-            'class': 'form-control',
-            'placeholder': 'Пароль'
-        }),
-        label='Пароль'
+        widget=forms.PasswordInput(
+            attrs={"class": "form-control", "placeholder": "Пароль"}
+        ),
+        label="Пароль",
     )
 
     error_messages = {
-        'invalid_login': 'Неверный email или пароль',
-        'inactive': 'Аккаунт деактивирован',
+        "invalid_login": "Неверный email или пароль",
+        "inactive": "Аккаунт деактивирован",
     }
 
     def confirm_login_allowed(self, user):
@@ -54,5 +61,5 @@ class CustomAuthenticationForm(AuthenticationForm):
         if not user.is_active:
             raise forms.ValidationError(
                 "Email не подтвержден. Проверьте почту или запросите новое письмо.",
-                code='inactive',
+                code="inactive",
             )

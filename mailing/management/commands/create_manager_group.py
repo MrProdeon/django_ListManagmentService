@@ -22,28 +22,36 @@ class Command(BaseCommand):
 
         permissions = [
             # Рассылки
-            ('can_view_all_mailings', 'Может просматривать все рассылки'),
-            ('can_disable_mailing', 'Может отключать рассылки'),
+            ("can_view_all_mailings", "Может просматривать все рассылки"),
+            ("can_disable_mailing", "Может отключать рассылки"),
             # Сообщения
-            ('can_view_all_messages', 'Может просматривать все сообщения'),
-            ('can_disable_message', 'Может отключать сообщения'),
+            ("can_view_all_messages", "Может просматривать все сообщения"),
+            ("can_disable_message", "Может отключать сообщения"),
             # Получатели
-            ('can_view_all_recipients', 'Может просматривать всех получателей'),
-            ('can_block_recipients', 'Может блокировать получателей'),
-            #Пользователи
+            ("can_view_all_recipients", "Может просматривать всех получателей"),
+            ("can_block_recipients", "Может блокировать получателей"),
+            # Пользователи
             ("can_block_users", "Может блокировать пользователей"),
         ]
 
         for codename, name in permissions:
             try:
                 if "mailing" in codename:
-                    permission = Permission.objects.get(codename=codename, content_type=mailing_ct)
-                elif 'message' in codename:
-                    permission = Permission.objects.get(codename=codename, content_type=message_ct)
-                elif 'recipient' in codename:
-                    permission = Permission.objects.get(codename=codename, content_type=client_ct)
-                elif 'user' in codename:
-                    permission = Permission.objects.get(codename=codename, content_type=user_ct)
+                    permission = Permission.objects.get(
+                        codename=codename, content_type=mailing_ct
+                    )
+                elif "message" in codename:
+                    permission = Permission.objects.get(
+                        codename=codename, content_type=message_ct
+                    )
+                elif "recipient" in codename:
+                    permission = Permission.objects.get(
+                        codename=codename, content_type=client_ct
+                    )
+                elif "user" in codename:
+                    permission = Permission.objects.get(
+                        codename=codename, content_type=user_ct
+                    )
                 else:
                     continue
 
@@ -51,6 +59,5 @@ class Command(BaseCommand):
                 print(f"Добавлено право: {name}")
             except Permission.DoesNotExist:
                 print(f"Право {codename} не найдено")
-
 
         print("Группа менеджеров успешно настроена")

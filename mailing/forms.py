@@ -6,7 +6,8 @@ class MessageCreateForm(ModelForm):
 
     class Meta:
         model = MessageModel
-        fields = ['subject_line', 'message_text']
+        fields = ["subject_line", "message_text"]
+
 
 class MailingCreateForm(ModelForm):
 
