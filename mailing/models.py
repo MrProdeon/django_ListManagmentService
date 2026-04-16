@@ -37,7 +37,7 @@ class MailingModel(models.Model):
         ('created', 'Создана'),
         ('started', 'Запущена'),
         ('completed', 'Завершена'),
-        ('disables', "Отключена")
+        ('disabled', "Отключена")
     ]
 
     start_time = models.DateTimeField(verbose_name="Дата и время запуска рассылки")
@@ -68,12 +68,16 @@ class MailingModel(models.Model):
     def update_status(self):
         now = timezone.now()
 
-        if now < self.start_time:
-            new_status = "created"
-        elif now > self.end_time:
-            new_status = "completed"
-        elif self.start_time <= now <= self.end_time:
-            new_status = "started"
+        if self.status == "disabled":
+            new_status = "disabled"
+        else:
+
+            if now < self.start_time:
+                new_status = "created"
+            elif now > self.end_time:
+                new_status = "completed"
+            elif self.start_time <= now <= self.end_time:
+                new_status = "started"
 
         if new_status != self.status:
             self.status = new_status
