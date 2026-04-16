@@ -1,0 +1,124 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card shadow-sm border-0">
+        <div class="card-header bg-primary text-white">
+            <h4 class="mb-0">
+                <i class="bi bi-clock-history me-2"></i>
+                {% if mailing %}
+                    Попытки отправки рассылки: {{ mailing.message.subject_line|default:"Без темы" }}
+                {% else %}
+                    Все попытки отправки
+                {% endif %}
+            </h4>
+        </div>
+        <div class="card-body">
+            {% if attempts %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>ID</th>
+                                <th>Рассылка</th>
+                                <th>Владелец</th>
+                                <th>Дата и время</th>
+                                <th>Статус</th>
+                                <th>Ответ сервера</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for attempt in attempts %}
+                            <tr>
+                                <td>{{ attempt.id }}</td>
+                                <td>
+                                    <a href="{% url 'mailing:detail_mailing' attempt.mailing.id %}">
+                                        {{ attempt.mailing.message.subject_line|default:"Без темы"|truncatechars:30 }}
+                                    </a>
+                                </td>
+                                <td>{{ attempt.mailing.owner.email|default:"Не указан" }}</td>
+                                <td>{{ attempt.attempt_time|date:"d.m.Y H:i:s" }}</td>
+                                <td>
+                                    {% if attempt.status == 'succes' %}
+                                        <span class="badge bg-success">
+                                            <i class="bi bi-check-circle-fill me-1"></i>Успешно
+                                        </span>
+                                    {% else %}
+                                        <span class="badge bg-danger">
+                                            <i class="bi bi-x-circle-fill me-1"></i>Неуспешно
+                                        </span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <span class="server-response" title="{{ attempt.server_response }}">
+                                        {{ attempt.server_response|truncatechars:50 }}
+                                    </span>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- Пагинация -->
+                {% if is_paginated %}
+                <nav aria-label="Page navigation" class="mt-4">
+                    <ul class="pagination justify-content-center">
+                        {% if page_obj.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.previous_page_number }}">
+                                    <i class="bi bi-chevron-left"></i> Назад
+                                </a>
+                            </li>
+                        {% endif %}
+                        
+                        {% for num in page_obj.paginator.page_range %}
+                            <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+                                <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                            </li>
+                        {% endfor %}
+                        
+                        {% if page_obj.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.next_page_number }}">
+                                    Вперед <i class="bi bi-chevron-right"></i>
+                                </a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+                {% endif %}
+                
+            {% else %}
+                <div class="text-center py-5">
+                    <i class="bi bi-inbox display-1 text-muted"></i>
+                    <h5 class="text-muted mt-3">Нет попыток отправки</h5>
+                    <p class="text-muted">Для этой рассылки пока нет записей о попытках отправки.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <div class="mt-3">
+        <a href="javascript:history.back()" class="btn btn-secondary">
+            <i class="bi bi-arrow-left me-2"></i>Назад
+        </a>
+        {% if mailing %}
+            <a href="{% url 'mailing:detail_mailing' mailing.id %}" class="btn btn-outline-primary">
+                <i class="bi bi-info-circle me-2"></i>К рассылке
+            </a>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+    .server-response {
+        cursor: help;
+        max-width: 300px;
+        display: inline-block;
+    }
+    .table td {
+        vertical-align: middle;
+    }
+</style>
+{% endblock %}

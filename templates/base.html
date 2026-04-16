@@ -117,6 +117,9 @@
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'mailing:report' %}">Отчёт</a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'mailing:attempt_list' %}">Попытки рассылок</a>
+                    </li>
                     {% if perms.mailing.can_view_all_mailings or user.is_superuser%}
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'users:list_users' %}">Список пользователей</a>

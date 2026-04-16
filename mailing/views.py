@@ -14,6 +14,7 @@ from django.db.models import Count
 from django.views.decorators.cache import cache_page
 from django.utils.decorators import method_decorator
 from django.core.cache import cache
+from django.db.models import Q
 
 
 # Create your views here.
@@ -260,5 +261,46 @@ class ReportView(LoginRequiredMixin, TemplateView):
         context["all_attempts"] = all_attempts.count()
         context["success_attempts"] = all_attempts.filter(status="succes").count()
         context["unsuccess_attemps"] = all_attempts.filter(status="unsucces").count()
+
+        return context
+
+
+class AttemptToSendListView(LoginRequiredMixin, ListView):
+    model = AttemptToSend
+    template_name = "attempts.html"
+    context_object_name = "attempts"
+    paginate_by = 20
+
+    def get_queryset(self):
+        user = self.request.user
+        mailing_id = self.kwargs.get('pk')
+
+
+        queryset = AttemptToSend.objects.select_related('mailing', 'mailing__message', 'mailing__owner')
+
+
+        if mailing_id:
+            queryset = queryset.filter(mailing_id=mailing_id)
+
+
+        if user.is_superuser:
+
+            return queryset
+
+        if user.has_perm('mailing.can_view_all_mailings'):
+
+            return queryset
+
+
+        return queryset.filter(mailing__owner=user)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        mailing_id = self.kwargs.get('pk')
+
+        if mailing_id:
+            from .models import MailingModel
+            mailing = MailingModel.objects.get(pk=mailing_id)
+            context['mailing'] = mailing
 
         return context
